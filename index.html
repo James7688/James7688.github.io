@@ -162,10 +162,10 @@
 
   <div id="dragHint">You can drag the view with your mouse.</div>
 
-  <script type="module">
-    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
-    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
 
+  <script>
     // =========================
     // Basic setup
     // =========================
@@ -183,13 +183,13 @@
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.outputEncoding = THREE.sRGBEncoding;
     document.body.appendChild(renderer.domElement);
 
     // =========================
     // Camera controls
     // =========================
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
     controls.enablePan = false;
@@ -206,7 +206,6 @@
 
     function loadTexture(url) {
       const tex = textureLoader.load(url);
-      tex.colorSpace = THREE.SRGBColorSpace;
       return tex;
     }
 
@@ -223,7 +222,7 @@
     // =========================
     // Stars
     // =========================
-    function createStars(count = 3000) {
+    function createStars(count) {
       const geometry = new THREE.BufferGeometry();
       const positions = new Float32Array(count * 3);
 
@@ -247,7 +246,7 @@
       return stars;
     }
 
-    const stars = createStars();
+    const stars = createStars(3000);
 
     // =========================
     // Sun
@@ -282,18 +281,12 @@
     const planetGroup = new THREE.Group();
     scene.add(planetGroup);
 
-    function makePlanet(size, textureURL, x, normalURL = null) {
+    function makePlanet(size, textureURL, x) {
       const geo = new THREE.SphereGeometry(size, 64, 64);
-      const matOptions = {
+      const mat = new THREE.MeshStandardMaterial({
         map: loadTexture(textureURL),
         roughness: 1
-      };
-
-      if (normalURL) {
-        matOptions.normalMap = loadTexture(normalURL);
-      }
-
-      const mat = new THREE.MeshStandardMaterial(matOptions);
+      });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(x, 0, 0);
       planetGroup.add(mesh);
@@ -306,9 +299,6 @@
       -70
     );
 
-    // =========================
-    // Venus (improved)
-    // =========================
     const venusSurfaceTex = loadTexture("https://threejs.org/examples/textures/planets/venus.jpg");
 
     const venus = new THREE.Mesh(
@@ -316,7 +306,7 @@
       new THREE.MeshStandardMaterial({
         map: venusSurfaceTex,
         roughness: 0.92,
-        metalness: 0.0
+        metalness: 0
       })
     );
     venus.position.set(-40, 0, 0);
@@ -390,7 +380,6 @@
       290
     );
 
-    // Saturn ring
     const ringGeo = new THREE.RingGeometry(12, 18, 64);
     const ringMat = new THREE.MeshBasicMaterial({
       map: loadTexture("https://threejs.org/examples/textures/planets/saturnringcolor.jpg"),
@@ -402,7 +391,6 @@
     saturnRing.rotation.x = Math.PI / 2.5;
     saturn.add(saturnRing);
 
-    // Earth moon
     const moon = new THREE.Mesh(
       new THREE.SphereGeometry(1.2, 24, 24),
       new THREE.MeshStandardMaterial({
@@ -412,7 +400,6 @@
     );
     scene.add(moon);
 
-    // Earth cloud layer
     const earthCloud = new THREE.Mesh(
       new THREE.SphereGeometry(7.35, 64, 64),
       new THREE.MeshStandardMaterial({
@@ -519,7 +506,6 @@
     const probe = makeProbe();
     const rocket = makeRocket();
 
-    // Line from Earth to Venus
     const routeMaterial = new THREE.LineBasicMaterial({
       color: 0x88ccff,
       transparent: true,
@@ -567,7 +553,7 @@ The specialists we bring are:
 - mission controllers`,
         camPos: new THREE.Vector3(18, 6, 20),
         lookAt: new THREE.Vector3(earth.position.x, 0, 0),
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = false;
           probe.visible = false;
@@ -582,7 +568,7 @@ The specialists we bring are:
 Venus is one of the most extreme planets in our Solar System.`,
         camPos: new THREE.Vector3(12, 8, 26),
         lookAt: new THREE.Vector3(earth.position.x, 0, 0),
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = false;
           probe.visible = false;
@@ -599,7 +585,7 @@ We can also discover new things that we do not know yet.
 Space exploration also helps us improve technology on Earth.`,
         camPos: new THREE.Vector3(40, 30, 180),
         lookAt: new THREE.Vector3(40, 0, 0),
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = false;
           probe.visible = false;
@@ -617,7 +603,7 @@ Studying Venus helps us understand why planets can change so much.`,
         camPos: new THREE.Vector3(-15, 12, 42),
         lookAt: new THREE.Vector3(venus.position.x, 0, 0),
         showVenusImages: true,
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = false;
           probe.visible = false;
@@ -635,7 +621,7 @@ This can help us understand how planets change over time.`,
         camPos: new THREE.Vector3(-26, 8, 24),
         lookAt: new THREE.Vector3(venus.position.x, 0, 0),
         showVenusImages: true,
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = false;
           probe.visible = false;
@@ -654,7 +640,7 @@ Because of this, spacecraft cannot stay there for a long time.`,
         camPos: new THREE.Vector3(-32, 6, 18),
         lookAt: new THREE.Vector3(venus.position.x, 0, 0),
         showVenusImages: true,
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = false;
           probe.visible = false;
@@ -672,7 +658,7 @@ An orbiter stays around Venus, and a probe goes into the atmosphere.
 The data is sent back to Earth.`,
         camPos: new THREE.Vector3(-8, 22, 85),
         lookAt: new THREE.Vector3(-18, 2, 0),
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = true;
           orbiter.visible = true;
           probe.visible = true;
@@ -690,7 +676,7 @@ It also sends information back to Earth.`,
         camPos: new THREE.Vector3(-20, 10, 20),
         lookAt: new THREE.Vector3(venus.position.x, 0, 0),
         showVenusImages: true,
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = true;
           probe.visible = false;
@@ -708,7 +694,7 @@ It sends data while it is going down.`,
         camPos: new THREE.Vector3(-34, 4, 15),
         lookAt: new THREE.Vector3(venus.position.x, -2, 0),
         showVenusImages: true,
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = false;
           probe.visible = true;
@@ -724,7 +710,7 @@ By studying Venus, we can learn about climate and how planets change.
 It also helps scientists study other planets in the future.`,
         camPos: new THREE.Vector3(-5, 10, 50),
         lookAt: new THREE.Vector3(-20, 0, 0),
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = true;
           probe.visible = false;
@@ -740,7 +726,7 @@ Even if it is very dangerous, it can teach us a lot.
 Exploring Venus helps us understand our planet and the universe better.`,
         camPos: new THREE.Vector3(10, 18, 95),
         lookAt: new THREE.Vector3(venus.position.x, 0, 0),
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = true;
           probe.visible = true;
@@ -756,7 +742,7 @@ Exploring Venus helps us understand our planet and the universe better.`,
 We hope you learned more about Venus and space exploration.`,
         camPos: new THREE.Vector3(18, 10, 120),
         lookAt: new THREE.Vector3(venus.position.x, 0, 0),
-        onEnter: () => {
+        onEnter: function () {
           routeLine.visible = false;
           orbiter.visible = false;
           probe.visible = false;
@@ -766,18 +752,17 @@ We hope you learned more about Venus and space exploration.`,
     ];
 
     let currentScene = 0;
-
-    const camTargetPos = new THREE.Vector3().copy(scenes[0].camPos);
-    const camLookTarget = new THREE.Vector3().copy(scenes[0].lookAt);
+    const camTargetPos = scenes[0].camPos.clone();
+    const camLookTarget = scenes[0].lookAt.clone();
 
     function updateText(sceneData) {
       panel.classList.add("fadeOut");
 
-      setTimeout(() => {
+      setTimeout(function () {
         titleEl.textContent = sceneData.title;
         subtitleEl.textContent = sceneData.subtitle;
         bodyTextEl.textContent = sceneData.text;
-        sceneCounterEl.textContent = `Scene ${currentScene + 1} / ${scenes.length}`;
+        sceneCounterEl.textContent = "Scene " + (currentScene + 1) + " / " + scenes.length;
         venusGalleryEl.style.display = sceneData.showVenusImages ? "flex" : "none";
         dragHintEl.classList.toggle("show", !!sceneData.showVenusImages);
         panel.classList.remove("fadeOut");
@@ -787,20 +772,15 @@ We hope you learned more about Venus and space exploration.`,
     function goToScene(index) {
       currentScene = index;
       const s = scenes[index];
-
       camTargetPos.copy(s.camPos);
       camLookTarget.copy(s.lookAt);
-
       if (s.onEnter) s.onEnter();
       updateText(s);
     }
 
     goToScene(0);
 
-    // =========================
-    // Keyboard controls
-    // =========================
-    window.addEventListener("keydown", (e) => {
+    window.addEventListener("keydown", function (e) {
       if (e.code === "Space") {
         e.preventDefault();
         let next = currentScene + 1;
@@ -819,33 +799,24 @@ We hope you learned more about Venus and space exploration.`,
       }
     });
 
-    // =========================
-    // Resize
-    // =========================
-    window.addEventListener("resize", () => {
+    window.addEventListener("resize", function () {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // =========================
-    // Animation
-    // =========================
     const clock = new THREE.Clock();
 
     function animate() {
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
-      // Smooth camera movement
       camera.position.lerp(camTargetPos, 0.035);
       controls.target.lerp(camLookTarget, 0.05);
       controls.update();
 
-      // Gentle star rotation
       stars.rotation.y += 0.00008;
 
-      // Rotate planets
       mercury.rotation.y += 0.004;
       venus.rotation.y += 0.0018;
       earth.rotation.y += 0.008;
@@ -862,14 +833,12 @@ We hope you learned more about Venus and space exploration.`,
       venusGlow.scale.setScalar(1.0 + pulse);
       venusHaze.scale.setScalar(1.0 + pulse * 0.6);
 
-      // Moon orbit around Earth
       moon.position.set(
         earth.position.x + Math.cos(t * 1.2) * 12,
         0,
         earth.position.z + Math.sin(t * 1.2) * 12
       );
 
-      // Rocket near Earth scenes
       if (rocket.visible) {
         if (currentScene <= 1) {
           rocket.position.set(earth.position.x + 10, 0, 0);
@@ -891,7 +860,6 @@ We hope you learned more about Venus and space exploration.`,
         }
       }
 
-      // Orbiter around Venus
       if (orbiter.visible) {
         const r = 16;
         orbiter.position.set(
@@ -902,7 +870,6 @@ We hope you learned more about Venus and space exploration.`,
         orbiter.lookAt(venus.position);
       }
 
-      // Probe near Venus
       if (probe.visible) {
         const descend = 8 - ((t * 1.4) % 10);
         probe.position.set(venus.position.x + 10, descend - 3, 0);
@@ -910,8 +877,7 @@ We hope you learned more about Venus and space exploration.`,
         probe.rotation.y += 0.01;
       }
 
-      // Panel glow
-      panel.style.boxShadow = `0 0 ${22 + Math.sin(t * 2) * 6}px rgba(255,255,255,0.08)`;
+      panel.style.boxShadow = "0 0 " + (22 + Math.sin(t * 2) * 6) + "px rgba(255,255,255,0.08)";
 
       renderer.render(scene, camera);
     }
