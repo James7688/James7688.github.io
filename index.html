@@ -244,11 +244,54 @@
       -70
     );
 
-    const venus = makePlanet(
-      6.8,
-      "https://threejs.org/examples/textures/planets/venus.jpg",
-      -40
-    );
+// Venus
+const venusSurfaceTex = loadTexture("https://threejs.org/examples/textures/planets/venus.jpg");
+
+const venus = new THREE.Mesh(
+  new THREE.SphereGeometry(6.8, 96, 96),
+  new THREE.MeshStandardMaterial({
+    map: venusSurfaceTex,
+    roughness: 0.95,
+    metalness: 0.0
+  })
+);
+venus.position.set(-40, 0, 0);
+planetGroup.add(venus);
+
+// Venus soft cloud layer
+const venusCloud = new THREE.Mesh(
+  new THREE.SphereGeometry(6.95, 96, 96),
+  new THREE.MeshStandardMaterial({
+    map: venusSurfaceTex,
+    transparent: true,
+    opacity: 0.22,
+    roughness: 1,
+    depthWrite: false
+  })
+);
+venus.add(venusCloud);
+
+// Venus color glow
+const venusGlow = new THREE.Mesh(
+  new THREE.SphereGeometry(7.5, 64, 64),
+  new THREE.MeshBasicMaterial({
+    color: 0xffb35c,
+    transparent: true,
+    opacity: 0.16
+  })
+);
+venus.add(venusGlow);
+
+// Venus haze glow
+const venusHaze = new THREE.Mesh(
+  new THREE.SphereGeometry(7.9, 64, 64),
+  new THREE.MeshBasicMaterial({
+    color: 0xffd6a0,
+    transparent: true,
+    opacity: 0.06
+  })
+);
+venus.add(venusHaze);
 
     const earth = makePlanet(
       7.2,
