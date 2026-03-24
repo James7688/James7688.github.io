@@ -64,8 +64,11 @@
     }
     #venusImageScene.active { display:flex; }
     #venusImageScene img {
-      width:100%; height:100%; object-fit:cover; opacity:0;
-      transition:opacity 1s ease;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      opacity:0;
+      transition:opacity 0.8s ease;
       background:#000;
     }
     #venusImageScene img.loaded { opacity:1; }
@@ -74,8 +77,14 @@
       padding:60px 60px 40px;
       background:linear-gradient(transparent, rgba(0,0,0,0.85));
       font-size:clamp(14px,1.5vw,20px); line-height:1.6; color:#f0f0f0;
+      z-index:1;
     }
-    #venusImageCaption strong { display:block; font-size:clamp(18px,2vw,28px); color:#ffd79a; margin-bottom:8px; }
+    #venusImageCaption strong {
+      display:block;
+      font-size:clamp(18px,2vw,28px);
+      color:#ffd79a;
+      margin-bottom:8px;
+    }
   </style>
 </head>
 <body>
@@ -93,9 +102,8 @@
 <div id="credits">Quy Anh Nguyen • Huyen Tien</div>
 <div id="navHint">Press Space or → to advance</div>
 
-<!-- Full-screen Venus image scenes -->
 <div id="venusImageScene">
-  <img id="venusImg" src="" alt="Venus">
+  <img id="venusImg" src="" alt="Venus" />
   <div id="venusImageCaption">
     <strong id="venusImgTitle"></strong>
     <span id="venusImgText"></span>
@@ -368,10 +376,8 @@ const neptune = mkPlanet(7.4, T.neptune, 294, 0.65, 0.05);
 addGlow(neptune, 7.9, 0x3355ff, 0.07);
 
 // ══════════════════════════════════════════════════════════
-//  SPACECRAFT – correctly proportioned
+//  SPACECRAFT
 // ══════════════════════════════════════════════════════════
-
-// ── ROCKET ──
 function makeRocket() {
   const g = new THREE.Group();
   const M = {
@@ -458,7 +464,6 @@ function makeRocket() {
   return g;
 }
 
-// ── ORBITER ──
 function makeOrbiter() {
   const g = new THREE.Group();
   const M = {
@@ -578,7 +583,6 @@ function makeOrbiter() {
   return g;
 }
 
-// ── PROBE ──
 function makeProbe() {
   const g = new THREE.Group();
   const M = {
@@ -665,7 +669,7 @@ routeLine.visible = false;
 pg.add(routeLine);
 
 // ══════════════════════════════════════════════════════════
-//  SCENE DEFINITIONS
+//  SCENES
 // ══════════════════════════════════════════════════════════
 const VP = venus.position;
 
@@ -839,57 +843,142 @@ const venusImgTitle = document.getElementById("venusImgTitle");
 const venusImgText = document.getElementById("venusImgText");
 
 let cur = 0;
+let venusLoadToken = 0;
 const camTarget = SCENES[0].cam.clone();
 const lookTarget = SCENES[0].look.clone();
+
 const VENUS_FALLBACK_SRC = "https://threejs.org/examples/textures/planets/venus.jpg";
 
-function showVenusImage(src) {
+function escapeSvgText(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function makePlaceholderDataUri(title) {
+  const safeTitle = escapeSvgText(title || "Venus");
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+      <defs>
+        <radialGradient id="g1" cx="50%" cy="45%" r="55%">
+          <stop offset="0%" stop-color="#ffcf7a"/>
+          <stop offset="35%" stop-color="#e59a47"/>
+          <stop offset="65%" stop-color="#9f5a2b"/>
+          <stop offset="100%" stop-color="#24140d"/>
+        </radialGradient>
+        <filter id="noise">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+          <feColorMatrix type="saturate" values="0.25"/>
+          <feBlend mode="overlay"/>
+        </filter>
+      </defs>
+      <rect width="1600" height="900" fill="#000"/>
+      <circle cx="800" cy="430" r="300" fill="url(#g1)" filter="url(#noise)"/>
+      <ellipse cx="800" cy="430" rx="305" ry="210" fill="none" stroke="rgba(255,220,150,0.18)" stroke-width="28"/>
+      <text x="800" y="790" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="56" fill="#ffd79a">${safeTitle}</text>
+      <text x="800" y="845" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" fill="#e8d0b0">Image unavailable — placeholder shown</text>
+    </svg>
+  `.trim();
+
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
+function buildProxyCandidates(url) {
+  const noProto = url.replace(/^https?:\/\//, "");
+  return [
+    "https://images.weserv.nl/?url=" + encodeURIComponent(noProto),
+    "https://wsrv.nl/?url=" + encodeURIComponent(noProto)
+  ];
+}
+
+function preloadImage(url, timeoutMs = 8000) {
+  return new Promise((resolve, reject) => {
+    const testImg = new Image();
+    let done = false;
+
+    const timer = setTimeout(() => {
+      if (done) return;
+      done = true;
+      testImg.onload = null;
+      testImg.onerror = null;
+      reject(new Error("timeout"));
+    }, timeoutMs);
+
+    testImg.onload = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve(url);
+    };
+
+    testImg.onerror = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      reject(new Error("load failed"));
+    };
+
+    testImg.referrerPolicy = "no-referrer";
+    testImg.crossOrigin = "anonymous";
+    testImg.src = url;
+  });
+}
+
+async function showVenusImage(src, titleText) {
+  const token = ++venusLoadToken;
   venusImg.classList.remove("loaded");
   venusImg.onload = null;
   venusImg.onerror = null;
+  venusImg.removeAttribute("src");
 
-  let finished = false;
-  let triedProxy = false;
-  let triedFallback = false;
+  const candidates = [
+    src,
+    ...buildProxyCandidates(src),
+    VENUS_FALLBACK_SRC
+  ];
 
-  function markLoaded() {
-    if (finished) return;
-    finished = true;
+  let workingSrc = null;
+
+  for (const candidate of candidates) {
+    try {
+      await preloadImage(candidate, 7000);
+      if (token !== venusLoadToken) return;
+      workingSrc = candidate;
+      break;
+    } catch (err) {
+      // try next candidate
+    }
+  }
+
+  if (token !== venusLoadToken) return;
+
+  if (!workingSrc) {
+    workingSrc = makePlaceholderDataUri(titleText);
+  }
+
+  venusImg.onload = () => {
+    if (token !== venusLoadToken) return;
+    venusImg.classList.add("loaded");
+  };
+
+  venusImg.onerror = () => {
+    if (token !== venusLoadToken) return;
+    venusImg.onerror = null;
+    venusImg.onload = () => {
+      if (token !== venusLoadToken) return;
+      venusImg.classList.add("loaded");
+    };
+    venusImg.src = makePlaceholderDataUri(titleText);
+  };
+
+  venusImg.src = workingSrc;
+
+  if (venusImg.complete) {
     venusImg.classList.add("loaded");
   }
-
-  function buildProxyUrl(url) {
-    return "https://images.weserv.nl/?url=" + encodeURIComponent(url.replace(/^https?:\/\//, ""));
-  }
-
-  function load(url) {
-    venusImg.onload = () => {
-      markLoaded();
-    };
-
-    venusImg.onerror = () => {
-      if (!triedProxy) {
-        triedProxy = true;
-        load(buildProxyUrl(src));
-        return;
-      }
-
-      if (!triedFallback) {
-        triedFallback = true;
-        load(VENUS_FALLBACK_SRC);
-        return;
-      }
-
-      markLoaded();
-    };
-
-    venusImg.src = "";
-    requestAnimationFrame(() => {
-      venusImg.src = url;
-    });
-  }
-
-  load(src);
 }
 
 function goTo(i) {
@@ -899,19 +988,19 @@ function goTo(i) {
   if (s.type === "venus") {
     venusImgTitle.textContent = s.imgTitle;
     venusImgText.textContent = s.imgText;
-    showVenusImage(s.imgSrc);
-
     venusScene.classList.add("active");
     panel.classList.add("hidden");
     counterEl.textContent = "Scene " + (cur + 1) + " / " + SCENES.length;
+    showVenusImage(s.imgSrc, s.imgTitle);
     return;
   }
 
+  venusLoadToken++;
   venusScene.classList.remove("active");
   venusImg.classList.remove("loaded");
   venusImg.onload = null;
   venusImg.onerror = null;
-  venusImg.src = "";
+  venusImg.removeAttribute("src");
 
   camTarget.copy(s.cam);
   lookTarget.copy(s.look);
