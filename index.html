@@ -66,6 +66,7 @@
     #venusImageScene img {
       width:100%; height:100%; object-fit:cover; opacity:0;
       transition:opacity 1s ease;
+      background:#000;
     }
     #venusImageScene img.loaded { opacity:1; }
     #venusImageCaption {
@@ -840,17 +841,48 @@ const venusImgText = document.getElementById("venusImgText");
 let cur = 0;
 const camTarget = SCENES[0].cam.clone();
 const lookTarget = SCENES[0].look.clone();
+const VENUS_FALLBACK_SRC = "https://threejs.org/examples/textures/planets/venus.jpg";
+
+function showVenusImage(src) {
+  venusImg.classList.remove("loaded");
+  venusImg.onload = null;
+  venusImg.onerror = null;
+
+  let done = false;
+
+  venusImg.onload = () => {
+    if (done) return;
+    done = true;
+    venusImg.classList.add("loaded");
+  };
+
+  venusImg.onerror = () => {
+    if (done) return;
+    done = true;
+
+    venusImg.onload = () => {
+      venusImg.classList.add("loaded");
+    };
+
+    venusImg.src = VENUS_FALLBACK_SRC;
+  };
+
+  // force reload even when browser caches / previous broken image state sticks
+  venusImg.src = "";
+  requestAnimationFrame(() => {
+    venusImg.src = src;
+  });
+}
 
 function goTo(i) {
   cur = Math.max(0, Math.min(i, SCENES.length - 1));
   const s = SCENES[cur];
 
   if (s.type === "venus") {
-    venusImg.classList.remove("loaded");
     venusImgTitle.textContent = s.imgTitle;
     venusImgText.textContent = s.imgText;
-    venusImg.src = s.imgSrc;
-    venusImg.onload = () => venusImg.classList.add("loaded");
+    showVenusImage(s.imgSrc);
+
     venusScene.classList.add("active");
     panel.classList.add("hidden");
     counterEl.textContent = "Scene " + (cur + 1) + " / " + SCENES.length;
@@ -858,6 +890,11 @@ function goTo(i) {
   }
 
   venusScene.classList.remove("active");
+  venusImg.classList.remove("loaded");
+  venusImg.onload = null;
+  venusImg.onerror = null;
+  venusImg.src = "";
+
   camTarget.copy(s.cam);
   lookTarget.copy(s.look);
 
