@@ -6,76 +6,166 @@
   <title>Exploring Venus – Mission Plan</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width:100%; height:100%; overflow:hidden; background:#000; font-family:'Segoe UI',Arial,sans-serif; color:#fff; }
-    canvas { display:block; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #fff;
+    }
+    canvas { display: block; }
 
-    /* ── PANEL ── */
     #overlay {
-      position:fixed; inset:0; pointer-events:none;
-      display:flex; align-items:center; justify-content:flex-start;
-      padding:4vw; z-index:10;
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 4vw;
+      z-index: 10;
     }
+
     #panel {
-      max-width:500px; width:100%;
-      background:rgba(0,0,0,0.55);
-      border:1px solid rgba(255,200,100,0.22);
-      backdrop-filter:blur(16px);
-      border-radius:20px; padding:24px 28px;
-      box-shadow:0 0 40px rgba(255,160,40,0.10);
-      transition:opacity 0.4s ease, transform 0.4s ease;
+      max-width: 500px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 200, 100, 0.22);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 24px 28px;
+      box-shadow: 0 0 40px rgba(255, 160, 40, 0.10);
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
-    #panel.hidden { opacity:0; transform:translateY(12px); pointer-events:none; }
+
+    #panel.hidden {
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+    }
+
     #sceneType {
-      font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
-      color:#ffa040; margin-bottom:8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #ffa040;
+      margin-bottom: 8px;
     }
+
     #title {
-      font-size:clamp(22px,3vw,38px); font-weight:800; line-height:1.15; margin-bottom:8px;
+      font-size: clamp(22px, 3vw, 38px);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 8px;
     }
-    #subtitle { font-size:clamp(12px,1.3vw,16px); color:#ffd79a; margin-bottom:14px; font-style:italic; }
-    #bodyText { font-size:clamp(12px,1.1vw,15px); line-height:1.7; color:#e8e8e8; white-space:pre-line; }
 
-    /* ── HUD ── */
+    #subtitle {
+      font-size: clamp(12px, 1.3vw, 16px);
+      color: #ffd79a;
+      margin-bottom: 14px;
+      font-style: italic;
+    }
+
+    #bodyText {
+      font-size: clamp(12px, 1.1vw, 15px);
+      line-height: 1.7;
+      color: #e8e8e8;
+      white-space: pre-line;
+    }
+
     #sceneCounter {
-      position:fixed; top:18px; right:18px;
-      padding:6px 14px; border-radius:999px;
-      background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.13);
-      font-size:12px; color:#bbb; pointer-events:none; z-index:11;
-    }
-    #credits {
-      position:fixed; top:18px; left:18px;
-      padding:6px 14px; border-radius:999px;
-      background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.12);
-      font-size:12px; color:#bbb; pointer-events:none; z-index:11;
-    }
-    #navHint {
-      position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
-      padding:6px 16px; border-radius:999px;
-      background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.10);
-      font-size:11px; color:#888; pointer-events:none; z-index:11;
-      transition:opacity 0.5s;
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      font-size: 12px;
+      color: #bbb;
+      pointer-events: none;
+      z-index: 11;
     }
 
-    /* ── FULLSCREEN VENUS IMAGE SCENES ── */
+    #credits {
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 12px;
+      color: #bbb;
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    #navHint {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      font-size: 11px;
+      color: #888;
+      pointer-events: none;
+      z-index: 11;
+      transition: opacity 0.5s;
+    }
+
     #venusImageScene {
-      position:fixed; inset:0; z-index:8;
-      display:none; align-items:center; justify-content:center;
-      background:#000;
+      position: fixed;
+      inset: 0;
+      z-index: 8;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      overflow: hidden;
     }
-    #venusImageScene.active { display:flex; }
+
+    #venusImageScene.active {
+      display: flex;
+    }
+
     #venusImageScene img {
-      width:100%; height:100%; object-fit:cover; opacity:0;
-      transition:opacity 1s ease;
-      background:#000;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      background: #000;
     }
-    #venusImageScene img.loaded { opacity:1; }
+
+    #venusImageScene img.loaded {
+      opacity: 1;
+    }
+
     #venusImageCaption {
-      position:absolute; bottom:0; left:0; right:0;
-      padding:60px 60px 40px;
-      background:linear-gradient(transparent, rgba(0,0,0,0.85));
-      font-size:clamp(14px,1.5vw,20px); line-height:1.6; color:#f0f0f0;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 60px 60px 40px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+      font-size: clamp(14px, 1.5vw, 20px);
+      line-height: 1.6;
+      color: #f0f0f0;
+      z-index: 1;
     }
-    #venusImageCaption strong { display:block; font-size:clamp(18px,2vw,28px); color:#ffd79a; margin-bottom:8px; }
+
+    #venusImageCaption strong {
+      display: block;
+      font-size: clamp(18px, 2vw, 28px);
+      color: #ffd79a;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -93,9 +183,8 @@
 <div id="credits">Quy Anh Nguyen • Huyen Tien</div>
 <div id="navHint">Press Space or → to advance</div>
 
-<!-- Full-screen Venus image scenes -->
 <div id="venusImageScene">
-  <img id="venusImg" src="" alt="Venus">
+  <img id="venusImg" src="" alt="" />
   <div id="venusImageCaption">
     <strong id="venusImgTitle"></strong>
     <span id="venusImgText"></span>
@@ -105,9 +194,6 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
 <script>
-// ══════════════════════════════════════════════════════════
-//  RENDERER
-// ══════════════════════════════════════════════════════════
 const scene3D = new THREE.Scene();
 scene3D.fog = new THREE.FogExp2(0x000000, 0.00038);
 
@@ -117,6 +203,7 @@ camera.position.set(22, 8, 24);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x000000, 1);
 renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild(renderer.domElement);
 
@@ -129,9 +216,6 @@ controls.maxDistance = 350;
 controls.rotateSpeed = 0.5;
 controls.zoomSpeed = 0.75;
 
-// ══════════════════════════════════════════════════════════
-//  LIGHTS
-// ══════════════════════════════════════════════════════════
 scene3D.add(new THREE.AmbientLight(0x18120a, 1.6));
 
 const sunLight = new THREE.PointLight(0xfff0cc, 3.5, 5000);
@@ -142,9 +226,6 @@ const blueFill = new THREE.PointLight(0x2244aa, 0.35, 2500);
 blueFill.position.set(250, -80, 80);
 scene3D.add(blueFill);
 
-// ══════════════════════════════════════════════════════════
-//  TEXTURES
-// ══════════════════════════════════════════════════════════
 const TL = new THREE.TextureLoader();
 const BP = "https://threejs.org/examples/textures/planets/";
 const T = {
@@ -162,9 +243,6 @@ const T = {
   neptune: TL.load(BP + "neptune.jpg"),
 };
 
-// ══════════════════════════════════════════════════════════
-//  STARS
-// ══════════════════════════════════════════════════════════
 (function () {
   const N = 6000;
   const pos = new Float32Array(N * 3);
@@ -197,9 +275,6 @@ const T = {
   scene3D.add(window._stars);
 })();
 
-// ══════════════════════════════════════════════════════════
-//  SUN
-// ══════════════════════════════════════════════════════════
 (function () {
   const g = new THREE.Group();
   const SP = new THREE.Vector3(-150, 30, 0);
@@ -231,9 +306,6 @@ const T = {
   scene3D.add(g);
 })();
 
-// ══════════════════════════════════════════════════════════
-//  PLANET HELPERS
-// ══════════════════════════════════════════════════════════
 const pg = new THREE.Group();
 scene3D.add(pg);
 
@@ -265,7 +337,6 @@ function addGlow(parent, r, c, o) {
   );
 }
 
-// ── PLANETS ──
 const mercury = mkPlanet(2.4, T.mercury, -72, 0.95);
 
 const venus = new THREE.Mesh(
@@ -367,11 +438,6 @@ uranus.add(uRing);
 const neptune = mkPlanet(7.4, T.neptune, 294, 0.65, 0.05);
 addGlow(neptune, 7.9, 0x3355ff, 0.07);
 
-// ══════════════════════════════════════════════════════════
-//  SPACECRAFT – correctly proportioned
-// ══════════════════════════════════════════════════════════
-
-// ── ROCKET ──
 function makeRocket() {
   const g = new THREE.Group();
   const M = {
@@ -458,7 +524,6 @@ function makeRocket() {
   return g;
 }
 
-// ── ORBITER ──
 function makeOrbiter() {
   const g = new THREE.Group();
   const M = {
@@ -578,7 +643,6 @@ function makeOrbiter() {
   return g;
 }
 
-// ── PROBE ──
 function makeProbe() {
   const g = new THREE.Group();
   const M = {
@@ -643,7 +707,6 @@ const rocket = makeRocket();
 const orbiter = makeOrbiter();
 const probe = makeProbe();
 
-// Route arc Earth → Venus
 const routePts = [];
 for (let i = 0; i <= 80; i++) {
   const t = i / 80;
@@ -664,9 +727,6 @@ const routeLine = new THREE.Line(
 routeLine.visible = false;
 pg.add(routeLine);
 
-// ══════════════════════════════════════════════════════════
-//  SCENE DEFINITIONS
-// ══════════════════════════════════════════════════════════
 const VP = venus.position;
 
 const SCENES = [
@@ -697,18 +757,21 @@ const SCENES = [
   {
     type: "venus",
     imgSrc: "https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg",
+    fallbackSrc: "https://threejs.org/examples/textures/planets/venus.jpg",
     imgTitle: "Venus — True Colour",
     imgText: "This is Venus as captured by NASA's Mariner 10 spacecraft. The thick cloud cover is made of sulfuric acid droplets and completely hides the surface from normal cameras.",
   },
   {
     type: "venus",
-    imgSrc: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Magellan_-_Full_Resolution_Radar_Mosaic_of_Venus_in_Sinusoidal_Equal-Area_Projection.jpg",
+    imgSrc: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Magellan_-_Full_Resolution_Radar_Mosaic_of_Venus_in_Sinusoidal_Equal-Area_Projection.jpg/1280px-Magellan_-_Full_Resolution_Radar_Mosaic_of_Venus_in_Sinusoidal_Equal-Area_Projection.jpg",
+    fallbackSrc: "https://threejs.org/examples/textures/planets/venus.jpg",
     imgTitle: "Venus Surface — Radar Map by Magellan",
     imgText: "Because Venus is covered by clouds, we use radar to see the surface. NASA's Magellan mission (1990–1994) mapped over 98% of Venus. It revealed thousands of volcanoes, vast lava plains, and mountain ranges.",
   },
   {
     type: "venus",
-    imgSrc: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/PIA00271.jpg/1280px-PIA00271.jpg",
+    imgSrc: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Maat_Mons_on_Venus.jpg/1280px-Maat_Mons_on_Venus.jpg",
+    fallbackSrc: "https://threejs.org/examples/textures/planets/venus.jpg",
     imgTitle: "Volcanic Landscape of Venus",
     imgText: "Scientists believe Venus may still have active volcanoes today. The surface is covered in lava flows and volcanic craters. High temperatures and pressure make it one of the most hostile surfaces in the Solar System.",
   },
@@ -786,7 +849,8 @@ const SCENES = [
   },
   {
     type: "venus",
-    imgSrc: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Venera_13_leg.jpg/1280px-Venera_13_leg.jpg",
+    imgSrc: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Venera_13_leg.jpg/1024px-Venera_13_leg.jpg",
+    fallbackSrc: "https://threejs.org/examples/textures/planets/venus.jpg",
     imgTitle: "Venera 13 — First Colour Photos from Venus (1982)",
     imgText: "The Soviet Venera 13 probe took the first colour photos from the Venusian surface in 1982. It survived for 127 minutes. The orange sky is caused by the thick atmosphere filtering sunlight. Rocky slabs cover the ground.",
   },
@@ -824,9 +888,6 @@ const SCENES = [
   },
 ];
 
-// ══════════════════════════════════════════════════════════
-//  DOM REFS
-// ══════════════════════════════════════════════════════════
 const panel = document.getElementById("panel");
 const sceneTypeEl = document.getElementById("sceneType");
 const titleEl = document.getElementById("title");
@@ -839,74 +900,59 @@ const venusImgTitle = document.getElementById("venusImgTitle");
 const venusImgText = document.getElementById("venusImgText");
 
 let cur = 0;
+let venusToken = 0;
 const camTarget = SCENES[0].cam.clone();
 const lookTarget = SCENES[0].look.clone();
-const VENUS_FALLBACK_SRC = "https://threejs.org/examples/textures/planets/venus.jpg";
 
-function showVenusImage(src) {
-  venusImg.classList.remove("loaded");
-  venusImg.onload = null;
-  venusImg.onerror = null;
+function loadDisplayImage(imgEl, src, fallbackSrc, token) {
+  imgEl.classList.remove("loaded");
+  imgEl.onload = null;
+  imgEl.onerror = null;
+  imgEl.src = "";
 
-  let finished = false;
-  let triedProxy = false;
-  let triedFallback = false;
+  let usedFallback = false;
 
-  function markLoaded() {
-    if (finished) return;
-    finished = true;
-    venusImg.classList.add("loaded");
-  }
+  imgEl.onload = () => {
+    if (token !== venusToken) return;
+    imgEl.classList.add("loaded");
+  };
 
-  function buildProxyUrl(url) {
-    return "https://images.weserv.nl/?url=" + encodeURIComponent(url.replace(/^https?:\/\//, ""));
-  }
+  imgEl.onerror = () => {
+    if (token !== venusToken) return;
 
-  function load(url) {
-    venusImg.onload = () => {
-      markLoaded();
-    };
+    if (!usedFallback && fallbackSrc) {
+      usedFallback = true;
+      imgEl.src = fallbackSrc;
+      return;
+    }
 
-    venusImg.onerror = () => {
-      if (!triedProxy) {
-        triedProxy = true;
-        load(buildProxyUrl(src));
-        return;
-      }
+    imgEl.classList.add("loaded");
+  };
 
-      if (!triedFallback) {
-        triedFallback = true;
-        load(VENUS_FALLBACK_SRC);
-        return;
-      }
-
-      markLoaded();
-    };
-
-    venusImg.src = "";
-    requestAnimationFrame(() => {
-      venusImg.src = url;
-    });
-  }
-
-  load(src);
+  setTimeout(() => {
+    if (token !== venusToken) return;
+    imgEl.src = src;
+  }, 20);
 }
 
 function goTo(i) {
   cur = Math.max(0, Math.min(i, SCENES.length - 1));
   const s = SCENES[cur];
 
+  counterEl.textContent = "Scene " + (cur + 1) + " / " + SCENES.length;
+
   if (s.type === "venus") {
+    venusToken++;
     venusImgTitle.textContent = s.imgTitle;
     venusImgText.textContent = s.imgText;
-    showVenusImage(s.imgSrc);
-
     venusScene.classList.add("active");
     panel.classList.add("hidden");
-    counterEl.textContent = "Scene " + (cur + 1) + " / " + SCENES.length;
+
+    loadDisplayImage(venusImg, s.imgSrc, s.fallbackSrc, venusToken);
     return;
   }
 
+  venusToken++;
   venusScene.classList.remove("active");
   venusImg.classList.remove("loaded");
   venusImg.onload = null;
@@ -924,7 +970,6 @@ function goTo(i) {
     titleEl.textContent = s.title;
     subtitleEl.textContent = s.subtitle || "";
     bodyTextEl.textContent = s.text || "";
-    counterEl.textContent = "Scene " + (cur + 1) + " / " + SCENES.length;
     panel.classList.remove("hidden");
   }, 220);
 }
@@ -946,9 +991,6 @@ window.addEventListener("resize", () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 
-// ══════════════════════════════════════════════════════════
-//  ANIMATION
-// ══════════════════════════════════════════════════════════
 const clock = new THREE.Clock();
 
 function animate() {
@@ -1047,5 +1089,3 @@ function animate() {
 
 animate();
 </script>
-</body>
-</html>
