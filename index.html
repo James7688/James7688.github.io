@@ -3,709 +3,734 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exploring Venus - Mission Plan</title>
+  <title>Exploring Venus – Mission Plan</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      width: 100%; height: 100%; overflow: hidden;
-      background: #000;
-      font-family: Arial, Helvetica, sans-serif;
-      color: white;
-    }
-    canvas { display: block; }
+    html, body { width:100%; height:100%; overflow:hidden; background:#000; font-family:'Segoe UI',Arial,sans-serif; color:#fff; }
+    canvas { display:block; }
 
+    /* ── PANEL ── */
     #overlay {
-      position: fixed; inset: 0; pointer-events: none;
-      display: flex; align-items: center; justify-content: flex-start;
-      padding: 5vw; z-index: 5;
+      position:fixed; inset:0; pointer-events:none;
+      display:flex; align-items:center; justify-content:flex-start;
+      padding:4vw; z-index:10;
     }
     #panel {
-      max-width: 560px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,200,100,0.18);
-      backdrop-filter: blur(14px);
-      border-radius: 18px; padding: 26px;
-      box-shadow: 0 0 30px rgba(255,180,60,0.08);
-      transition: opacity 0.45s ease, transform 0.45s ease;
+      max-width:500px; width:100%;
+      background:rgba(0,0,0,0.55);
+      border:1px solid rgba(255,200,100,0.22);
+      backdrop-filter:blur(16px);
+      border-radius:20px; padding:24px 28px;
+      box-shadow:0 0 40px rgba(255,160,40,0.10);
+      transition:opacity 0.4s ease, transform 0.4s ease;
+    }
+    #panel.hidden { opacity:0; transform:translateY(12px); pointer-events:none; }
+    #sceneType {
+      font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+      color:#ffa040; margin-bottom:8px;
     }
     #title {
-      font-size: clamp(26px, 3.6vw, 46px);
-      font-weight: 800; line-height: 1.1; margin-bottom: 10px;
+      font-size:clamp(22px,3vw,38px); font-weight:800; line-height:1.15; margin-bottom:8px;
     }
-    #subtitle {
-      font-size: clamp(13px, 1.4vw, 19px);
-      color: #ffd79a; margin-bottom: 16px;
-    }
-    #bodyText {
-      font-size: clamp(13px, 1.2vw, 17px);
-      line-height: 1.65; color: #efefef; white-space: pre-line;
-    }
+    #subtitle { font-size:clamp(12px,1.3vw,16px); color:#ffd79a; margin-bottom:14px; font-style:italic; }
+    #bodyText { font-size:clamp(12px,1.1vw,15px); line-height:1.7; color:#e8e8e8; white-space:pre-line; }
+
+    /* ── HUD ── */
     #sceneCounter {
-      position: fixed; top: 18px; right: 18px;
-      padding: 7px 14px; border-radius: 999px;
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(255,255,255,0.12);
-      font-size: 13px; color: #ccc;
-      pointer-events: none; z-index: 6;
+      position:fixed; top:18px; right:18px;
+      padding:6px 14px; border-radius:999px;
+      background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.13);
+      font-size:12px; color:#bbb; pointer-events:none; z-index:11;
     }
     #credits {
-      position: fixed; top: 18px; left: 18px;
-      padding: 7px 14px; border-radius: 999px;
-      background: rgba(0,0,0,0.45);
-      border: 1px solid rgba(255,255,255,0.12);
-      font-size: 13px; color: #ccc;
-      pointer-events: none; z-index: 6;
+      position:fixed; top:18px; left:18px;
+      padding:6px 14px; border-radius:999px;
+      background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.12);
+      font-size:12px; color:#bbb; pointer-events:none; z-index:11;
     }
     #navHint {
-      position: fixed; bottom: 22px; left: 50%;
-      transform: translateX(-50%);
-      padding: 7px 16px; border-radius: 999px;
-      background: rgba(0,0,0,0.45);
-      border: 1px solid rgba(255,255,255,0.1);
-      font-size: 12px; color: #aaa;
-      pointer-events: none; z-index: 6;
+      position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+      padding:6px 16px; border-radius:999px;
+      background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.10);
+      font-size:11px; color:#888; pointer-events:none; z-index:11;
+      transition:opacity 0.5s;
     }
-    .fadeOut { opacity: 0; transform: translateY(8px); }
 
-    #venusGallery {
-      position: fixed; left: 50%; bottom: 22px;
-      transform: translateX(-50%);
-      display: none; gap: 12px; z-index: 6; pointer-events: none;
+    /* ── FULLSCREEN VENUS IMAGE SCENES ── */
+    #venusImageScene {
+      position:fixed; inset:0; z-index:8;
+      display:none; align-items:center; justify-content:center;
+      background:#000;
     }
-    #venusGallery img {
-      width: min(18vw, 180px); height: min(11vw, 110px);
-      object-fit: cover; border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.2);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    #venusImageScene.active { display:flex; }
+    #venusImageScene img {
+      width:100%; height:100%; object-fit:cover; opacity:0;
+      transition:opacity 1s ease;
     }
+    #venusImageScene img.loaded { opacity:1; }
+    #venusImageCaption {
+      position:absolute; bottom:0; left:0; right:0;
+      padding:60px 60px 40px;
+      background:linear-gradient(transparent, rgba(0,0,0,0.85));
+      font-size:clamp(14px,1.5vw,20px); line-height:1.6; color:#f0f0f0;
+    }
+    #venusImageCaption strong { display:block; font-size:clamp(18px,2vw,28px); color:#ffd79a; margin-bottom:8px; }
   </style>
 </head>
 <body>
-  <div id="overlay">
-    <div id="panel">
-      <div id="title">Exploring Venus</div>
-      <div id="subtitle">Mission Plan by Quy Anh Nguyen and Huyen Tien</div>
-      <div id="bodyText"></div>
-    </div>
+
+<div id="overlay">
+  <div id="panel">
+    <div id="sceneType">Introduction</div>
+    <div id="title">Exploring Venus</div>
+    <div id="subtitle">Mission Plan by Quy Anh Nguyen and Huyen Tien</div>
+    <div id="bodyText"></div>
   </div>
-  <div id="sceneCounter">Scene 1 / 12</div>
-  <div id="credits">Quy Anh Nguyen • Huyen Tien</div>
-  <div id="navHint">← → Arrow keys or Space to navigate</div>
-  <div id="venusGallery">
-    <img src="venus1.jpg" alt="Venus 1">
-    <img src="venus2.jpg" alt="Venus 2">
-    <img src="venus3.jpg" alt="Venus 3">
+</div>
+
+<div id="sceneCounter">Scene 1 / 20</div>
+<div id="credits">Quy Anh Nguyen • Huyen Tien</div>
+<div id="navHint">Press Space or → to advance</div>
+
+<!-- Full-screen Venus image scenes -->
+<div id="venusImageScene">
+  <img id="venusImg" src="" alt="Venus">
+  <div id="venusImageCaption">
+    <strong id="venusImgTitle"></strong>
+    <span id="venusImgText"></span>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
-  <script>
-    // ─── RENDERER ────────────────────────────────────────────────
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.00042);
+<script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════
+//  RENDERER
+// ══════════════════════════════════════════════════════════
+const scene3D = new THREE.Scene();
+scene3D.fog = new THREE.FogExp2(0x000000, 0.00038);
 
-    const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 6000);
-    camera.position.set(18, 6, 20);
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 8000);
+camera.position.set(22, 8, 24);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    document.body.appendChild(renderer.domElement);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding;
+document.body.appendChild(renderer.domElement);
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; controls.dampingFactor = 0.06;
-    controls.enablePan = false; controls.minDistance = 6; controls.maxDistance = 300;
-    controls.rotateSpeed = 0.55; controls.zoomSpeed = 0.8;
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=0.055;
+controls.enablePan=false; controls.minDistance=5; controls.maxDistance=350;
+controls.rotateSpeed=0.5; controls.zoomSpeed=0.75;
 
-    // ─── LIGHTS ──────────────────────────────────────────────────
-    scene.add(new THREE.AmbientLight(0x221a10, 1.1));
-    const sunLight = new THREE.PointLight(0xfff0cc, 3.2, 4000);
-    sunLight.position.set(-140, 30, 0);
-    scene.add(sunLight);
-    const fillLight = new THREE.PointLight(0x2244aa, 0.4, 2000);
-    fillLight.position.set(200, -60, 100);
-    scene.add(fillLight);
+// ══════════════════════════════════════════════════════════
+//  LIGHTS
+// ══════════════════════════════════════════════════════════
+scene3D.add(new THREE.AmbientLight(0x18120a, 1.6));
+const sunLight = new THREE.PointLight(0xfff0cc, 3.5, 5000);
+sunLight.position.set(-150, 30, 0);
+scene3D.add(sunLight);
+scene3D.add(Object.assign(new THREE.PointLight(0x2244aa, 0.35, 2500), {position:{x:250,y:-80,z:80}}));
 
-    // ─── TEXTURES ────────────────────────────────────────────────
-    const TL = new THREE.TextureLoader();
-    const BASE = "https://threejs.org/examples/textures/planets/";
-    const T = {
-      mercury: TL.load(BASE + "mercury.jpg"),
-      venus:   TL.load(BASE + "venus_atmosphere.jpg"),
-      venusS:  TL.load(BASE + "venus.jpg"),
-      earth:   TL.load(BASE + "earth_atmos_2048.jpg"),
-      earthC:  TL.load(BASE + "earth_clouds_1024.png"),
-      moon:    TL.load(BASE + "moon_1024.jpg"),
-      mars:    TL.load(BASE + "mars_1k_color.jpg"),
-      jupiter: TL.load(BASE + "jupiter.jpg"),
-      saturn:  TL.load(BASE + "saturn.jpg"),
-      saturnR: TL.load(BASE + "saturnringcolor.jpg"),
-      uranus:  TL.load(BASE + "uranus.jpg"),
-      neptune: TL.load(BASE + "neptune.jpg"),
-    };
+// ══════════════════════════════════════════════════════════
+//  TEXTURES
+// ══════════════════════════════════════════════════════════
+const TL  = new THREE.TextureLoader();
+const BP  = "https://threejs.org/examples/textures/planets/";
+const T = {
+  mercury : TL.load(BP+"mercury.jpg"),
+  venusS  : TL.load(BP+"venus.jpg"),
+  venusA  : TL.load(BP+"venus_atmosphere.jpg"),
+  earth   : TL.load(BP+"earth_atmos_2048.jpg"),
+  earthC  : TL.load(BP+"earth_clouds_1024.png"),
+  moon    : TL.load(BP+"moon_1024.jpg"),
+  mars    : TL.load(BP+"mars_1k_color.jpg"),
+  jupiter : TL.load(BP+"jupiter.jpg"),
+  saturn  : TL.load(BP+"saturn.jpg"),
+  saturnR : TL.load(BP+"saturnringcolor.jpg"),
+  uranus  : TL.load(BP+"uranus.jpg"),
+  neptune : TL.load(BP+"neptune.jpg"),
+};
 
-    // ─── STARS ───────────────────────────────────────────────────
-    (function makeStars() {
-      const N = 5000;
-      const pos = new Float32Array(N * 3);
-      const col = new Float32Array(N * 3);
-      for (let i = 0; i < N; i++) {
-        const r = 1400;
-        pos[i*3]   = (Math.random()-.5)*r*2;
-        pos[i*3+1] = (Math.random()-.5)*r*2;
-        pos[i*3+2] = (Math.random()-.5)*r*2;
-        const warm = Math.random();
-        col[i*3]   = 0.85 + warm * 0.15;
-        col[i*3+1] = 0.85 + warm * 0.08;
-        col[i*3+2] = 0.9  + (1-warm) * 0.1;
-      }
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-      geo.setAttribute("color",    new THREE.BufferAttribute(col, 3));
-      scene.add(new THREE.Points(geo, new THREE.PointsMaterial({
-        size: 1.1, sizeAttenuation: true, vertexColors: true
-      })));
-    })();
+// ══════════════════════════════════════════════════════════
+//  STARS
+// ══════════════════════════════════════════════════════════
+(function(){
+  const N=6000, pos=new Float32Array(N*3), col=new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const r=1800, w=Math.random();
+    pos[i*3]=(Math.random()-.5)*r*2;
+    pos[i*3+1]=(Math.random()-.5)*r*2;
+    pos[i*3+2]=(Math.random()-.5)*r*2;
+    col[i*3]=0.8+w*0.2; col[i*3+1]=0.82+w*0.1; col[i*3+2]=0.9+(1-w)*0.1;
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  g.setAttribute("color",new THREE.BufferAttribute(col,3));
+  window._stars=new THREE.Points(g,new THREE.PointsMaterial({size:1.05,sizeAttenuation:true,vertexColors:true}));
+  scene3D.add(window._stars);
+})();
 
-    // ─── SUN ─────────────────────────────────────────────────────
-    (function makeSun() {
-      const g = new THREE.Group();
-      const sun = new THREE.Mesh(
-        new THREE.SphereGeometry(12, 48, 48),
-        new THREE.MeshBasicMaterial({ color: 0xffe066 })
+// ══════════════════════════════════════════════════════════
+//  SUN
+// ══════════════════════════════════════════════════════════
+(function(){
+  const g=new THREE.Group(), SP=new THREE.Vector3(-150,30,0);
+  g.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(13,48,48),new THREE.MeshBasicMaterial({color:0xffe066})),{position:SP.clone()}));
+  [[18,0.22,0xffaa22],[23,0.10,0xff8800],[30,0.04,0xff5500]].forEach(([r,o,c])=>{
+    g.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(r,32,32),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o})),{position:SP.clone()}));
+  });
+  scene3D.add(g);
+})();
+
+// ══════════════════════════════════════════════════════════
+//  PLANET HELPERS
+// ══════════════════════════════════════════════════════════
+const pg = new THREE.Group(); scene3D.add(pg);
+
+function mkPlanet(r,tex,x,rough,metal){
+  const m=new THREE.Mesh(new THREE.SphereGeometry(r,80,80),new THREE.MeshStandardMaterial({map:tex,roughness:rough??0.88,metalness:metal??0}));
+  m.position.set(x,0,0); pg.add(m); return m;
+}
+function addGlow(parent,r,c,o){
+  parent.add(new THREE.Mesh(new THREE.SphereGeometry(r,32,32),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:o,depthWrite:false})));
+}
+
+// ── PLANETS ──
+const mercury = mkPlanet(2.4,T.mercury,-72,0.95);
+
+const venus = new THREE.Mesh(
+  new THREE.SphereGeometry(6.8,128,128),
+  new THREE.MeshStandardMaterial({map:T.venusS,roughness:0.88})
+);
+venus.position.set(-42,0,0); pg.add(venus);
+const venusAtmo = new THREE.Mesh(
+  new THREE.SphereGeometry(7.05,64,64),
+  new THREE.MeshStandardMaterial({map:T.venusA,transparent:true,opacity:0.72,roughness:1,depthWrite:false})
+);
+venus.add(venusAtmo);
+addGlow(venus,7.6,0xffb84d,0.18); addGlow(venus,8.3,0xff9020,0.07); addGlow(venus,9.1,0xff6600,0.03);
+
+const earth = mkPlanet(7.2,T.earth,0);
+const earthCloud=new THREE.Mesh(new THREE.SphereGeometry(7.36,64,64),new THREE.MeshStandardMaterial({map:T.earthC,transparent:true,opacity:0.36,depthWrite:false}));
+earth.add(earthCloud); addGlow(earth,7.85,0x4499ff,0.07);
+
+const moon=new THREE.Mesh(new THREE.SphereGeometry(1.9,32,32),new THREE.MeshStandardMaterial({map:T.moon,roughness:0.95}));
+scene3D.add(moon);
+
+const mars=mkPlanet(4.2,T.mars,42,0.92); addGlow(mars,4.42,0xcc5533,0.06);
+const jupiter=mkPlanet(11,T.jupiter,114,0.75);
+const saturn=mkPlanet(9.4,T.saturn,174,0.80);
+[{i:11.5,o:14.5,op:0.82},{i:14.8,o:17.5,op:0.56},{i:17.9,o:19.4,op:0.28}].forEach(d=>{
+  const rg=new THREE.RingGeometry(d.i,d.o,128);
+  const pos=rg.attributes.position, uv=rg.attributes.uv;
+  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);uv.setXY(i,(Math.sqrt(x*x+z*z)-d.i)/(d.o-d.i),0);}
+  const ring=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({map:T.saturnR,side:THREE.DoubleSide,transparent:true,opacity:d.op}));
+  ring.rotation.x=Math.PI/2.5; saturn.add(ring);
+});
+const uranus=mkPlanet(7.6,T.uranus,234,0.60,0.05); addGlow(uranus,8.1,0x88ddcc,0.06);
+const uRing=new THREE.Mesh(new THREE.RingGeometry(9.4,10.8,64),new THREE.MeshBasicMaterial({color:0xaacccc,side:THREE.DoubleSide,transparent:true,opacity:0.20}));
+uRing.rotation.x=Math.PI/2; uRing.rotation.z=Math.PI/1.4; uranus.add(uRing);
+const neptune=mkPlanet(7.4,T.neptune,294,0.65,0.05); addGlow(neptune,7.9,0x3355ff,0.07);
+
+// ══════════════════════════════════════════════════════════
+//  SPACECRAFT – correctly proportioned
+// ══════════════════════════════════════════════════════════
+
+// ── ROCKET  (scale ≈ 2 units tall, reasonable vs planet) ──
+function makeRocket(){
+  const g=new THREE.Group();
+  const M={
+    silver:new THREE.MeshStandardMaterial({color:0xdde0e8,roughness:0.45,metalness:0.72}),
+    red:   new THREE.MeshStandardMaterial({color:0xff3322,roughness:0.5,metalness:0.3}),
+    dark:  new THREE.MeshStandardMaterial({color:0x2a2a35,roughness:0.6,metalness:0.55}),
+    gold:  new THREE.MeshStandardMaterial({color:0xffbb33,roughness:0.4,metalness:0.65}),
+  };
+  // Stage 1
+  g.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.38,0.40,1.60,24),M.silver),{position:{x:0,y:-0.35,z:0}}));
+  // Stage 1-2 interstage
+  g.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.40,0.40,0.10,24),M.dark),{position:{x:0,y:0.50,z:0}}));
+  // Stage 2
+  g.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.38,1.05,24),M.silver),{position:{x:0,y:1.12,z:0}}));
+  // Stage 3
+  g.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.30,0.75,24),M.silver),{position:{x:0,y:1.96,z:0}}));
+  // Nose cone
+  g.add(Object.assign(new THREE.Mesh(new THREE.ConeGeometry(0.22,0.78,24),M.red),{position:{x:0,y:2.73,z:0}}));
+  // Payload fairing halves
+  const f1=new THREE.Mesh(new THREE.CylinderGeometry(0.23,0.23,0.60,24,1,false,0,Math.PI),M.red); f1.position.set(0,2.35,0); g.add(f1);
+  const f2=f1.clone(); f2.rotation.y=Math.PI; g.add(f2);
+  // Gold thermal band
+  g.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.31,0.31,0.16,24),M.gold),{position:{x:0,y:1.73,z:0}}));
+  // Grid fins (4)
+  for(let i=0;i<4;i++){
+    const fin=new THREE.Mesh(new THREE.BoxGeometry(0.028,0.30,0.24),M.dark);
+    fin.position.set(Math.cos(i*Math.PI/2)*0.43,0.18,Math.sin(i*Math.PI/2)*0.43);
+    fin.rotation.y=i*Math.PI/2; g.add(fin);
+  }
+  // Landing legs (4)
+  for(let i=0;i<4;i++){
+    const leg=new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,0.62,8),M.silver);
+    const ang=i*Math.PI/2+Math.PI/4;
+    leg.position.set(Math.cos(ang)*0.38,-0.98,Math.sin(ang)*0.38);
+    leg.rotation.z=Math.cos(ang)*0.50; leg.rotation.x=-Math.sin(ang)*0.50; g.add(leg);
+  }
+  // Engine bells (3)
+  for(let i=0;i<3;i++){
+    const bell=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.17,0.24,16,1,true),M.dark);
+    bell.position.set(Math.cos(i*Math.PI*2/3)*0.19,-1.23,Math.sin(i*Math.PI*2/3)*0.19); g.add(bell);
+  }
+  // Window porthole
+  const win=new THREE.Mesh(new THREE.CircleGeometry(0.075,16),new THREE.MeshBasicMaterial({color:0x88ccff}));
+  win.position.set(0.31,1.95,0); win.rotation.y=Math.PI/2; g.add(win);
+  g.visible=false; scene3D.add(g); return g;
+}
+
+// ── ORBITER  ──
+function makeOrbiter(){
+  const g=new THREE.Group();
+  const M={
+    silver:new THREE.MeshStandardMaterial({color:0xc8cdd8,roughness:0.3,metalness:0.80}),
+    gold:  new THREE.MeshStandardMaterial({color:0xffcc44,roughness:0.35,metalness:0.72}),
+    dark:  new THREE.MeshStandardMaterial({color:0x22222e,roughness:0.5,metalness:0.6}),
+    blue:  new THREE.MeshStandardMaterial({color:0x1144cc,roughness:0.2,metalness:0.5}),
+    white: new THREE.MeshStandardMaterial({color:0xf0f0f0,roughness:0.6}),
+  };
+  // Hex bus
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(1.0,1.0,0.75,6),M.silver);
+  const topP=new THREE.Mesh(new THREE.CylinderGeometry(1.02,1.02,0.08,6),M.gold); topP.position.y=0.42;
+  const botP=topP.clone(); botP.position.y=-0.42;
+  g.add(body,topP,botP);
+  // High-gain dish
+  const dishRim=new THREE.Mesh(new THREE.TorusGeometry(0.90,0.05,12,40),M.silver); dishRim.rotation.x=Math.PI/2; dishRim.position.set(0,0,2.4);
+  const dishSurf=new THREE.Mesh(new THREE.SphereGeometry(0.90,24,24,0,Math.PI*2,0,Math.PI/3),new THREE.MeshStandardMaterial({color:0xddddee,roughness:0.3,metalness:0.6,side:THREE.DoubleSide}));
+  dishSurf.rotation.x=-Math.PI/2; dishSurf.position.set(0,0,2.4);
+  const dishFeed=new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.055,0.55,8),M.silver); dishFeed.position.set(0,0.35,2.4);
+  for(let i=0;i<3;i++){const s=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,0.95,6),M.silver);s.position.set(Math.cos(i*Math.PI*2/3)*0.35,0.22,2.0);s.rotation.x=Math.PI/2-0.35;s.rotation.z=i*Math.PI*2/3;g.add(s);}
+  g.add(dishRim,dishSurf,dishFeed);
+  // Solar wings
+  for(let side=-1;side<=1;side+=2){
+    const mast=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,2.6,8),M.silver); mast.rotation.z=Math.PI/2; mast.position.set(side*1.9,0,0); g.add(mast);
+    for(let p=0;p<2;p++){
+      const panel=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.042,0.95),M.blue); panel.position.set(side*(2.6+p*1.95),0,0); g.add(panel);
+      for(let row=-1;row<=1;row++){const gr=new THREE.Mesh(new THREE.BoxGeometry(1.79,0.05,0.035),new THREE.MeshBasicMaterial({color:0x223388}));gr.position.set(side*(2.6+p*1.95),0.04,row*0.30);g.add(gr);}
+    }
+  }
+  // Instruments
+  const iBase=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.28,0.55),M.dark); iBase.position.y=0.58; g.add(iBase);
+  for(let i=0;i<3;i++){
+    const inst=new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.085,0.24,10),i<2?M.dark:M.white); inst.position.set((i-1)*0.20,0.85,0); g.add(inst);
+    const lens=new THREE.Mesh(new THREE.CircleGeometry(0.07,12),new THREE.MeshBasicMaterial({color:0x88aacc})); lens.position.set((i-1)*0.20,0.98,0); lens.rotation.x=-Math.PI/2; g.add(lens);
+  }
+  // Thrusters (4)
+  for(let i=0;i<4;i++){const thr=new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.13,0.20,10,1,true),M.dark);thr.position.set(Math.cos(i*Math.PI/2)*1.06,-0.32,Math.sin(i*Math.PI/2)*1.06);thr.rotation.x=Math.PI/2;thr.rotation.y=i*Math.PI/2;g.add(thr);}
+  // Mag boom
+  const boom=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,1.75,6),M.silver); boom.rotation.z=Math.PI/2; boom.position.set(0,0.38,-2.0); boom.rotation.x=-0.28;
+  const magH=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.14,0.20),M.dark); magH.position.set(0,0.72,-3.0);
+  const tracker=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.15,0.28),M.dark); tracker.position.set(-0.86,0.40,0.38); tracker.rotation.z=0.4;
+  g.add(boom,magH,tracker);
+  g.visible=false; scene3D.add(g); return g;
+}
+
+// ── PROBE  ──
+function makeProbe(){
+  const g=new THREE.Group();
+  const M={
+    silver:new THREE.MeshStandardMaterial({color:0xbbbbcc,roughness:0.4,metalness:0.70}),
+    gold:  new THREE.MeshStandardMaterial({color:0xdd9922,roughness:0.5,metalness:0.62}),
+    dark:  new THREE.MeshStandardMaterial({color:0x101018,roughness:0.72}),
+    heat:  new THREE.MeshStandardMaterial({color:0x4a2810,roughness:0.92}),
+    white: new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:0.6}),
+  };
+  // Heat shield
+  const hs=new THREE.Mesh(new THREE.ConeGeometry(1.55,0.85,32),M.heat); hs.position.y=-1.0; hs.rotation.x=Math.PI;
+  const hsRim=new THREE.Mesh(new THREE.TorusGeometry(1.55,0.09,8,40),M.heat); hsRim.position.y=-1.0; hsRim.rotation.x=Math.PI/2;
+  // Pressure sphere
+  const vessel=new THREE.Mesh(new THREE.SphereGeometry(1.08,40,40),M.silver); vessel.position.y=0.12;
+  // Gold bands
+  for(const y of[-0.20,0.14,0.50]){const b=new THREE.Mesh(new THREE.TorusGeometry(1.09,0.065,8,36),M.gold);b.position.y=y;b.rotation.x=Math.PI/2;g.add(b);}
+  // Backshell
+  const bs=new THREE.Mesh(new THREE.SphereGeometry(1.12,32,32,0,Math.PI*2,0,Math.PI/2.2),M.white); bs.rotation.x=Math.PI; bs.position.y=0.85;
+  // Chute tube
+  const ct=new THREE.Mesh(new THREE.CylinderGeometry(0.20,0.20,0.55,16),M.dark); ct.position.y=1.75;
+  const ctc=new THREE.Mesh(new THREE.ConeGeometry(0.21,0.28,16),M.dark); ctc.position.y=2.15;
+  // Sensors
+  [[0,1.08,0],[0.78,0.65,0.56],[-0.72,0.38,0.72]].forEach(([x,y,z])=>{
+    const s=new THREE.Mesh(new THREE.CylinderGeometry(0.072,0.072,0.28,8),M.dark); s.position.set(x,y,z); s.lookAt(0,0,0); s.rotateX(Math.PI/2); g.add(s);
+  });
+  // Whip antenna
+  const ant=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.008,1.55,6),M.silver); ant.position.set(0.56,1.58,0); ant.rotation.z=0.28;
+  g.add(hs,hsRim,vessel,bs,ct,ctc,ant);
+  g.visible=false; scene3D.add(g); return g;
+}
+
+const rocket  = makeRocket();
+const orbiter = makeOrbiter();
+const probe   = makeProbe();
+
+// Route arc Earth → Venus
+const routePts=[];
+for(let i=0;i<=80;i++){
+  const t=i/80,p0=new THREE.Vector3(0,0,0),p1=new THREE.Vector3(-21,24,-14),p2=new THREE.Vector3(-42,0,0);
+  routePts.push(p0.clone().lerp(p1,t).lerp(p1.clone().lerp(p2,t),t));
+}
+const routeLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(routePts),new THREE.LineBasicMaterial({color:0x88ccff,transparent:true,opacity:0.48}));
+routeLine.visible=false; pg.add(routeLine);
+
+// ══════════════════════════════════════════════════════════
+//  SCENE DEFINITIONS
+//  type: "space" = 3D view   |   "venus" = fullscreen image
+// ══════════════════════════════════════════════════════════
+const VP = venus.position;
+
+const SCENES = [
+  // ── 1 ── TITLE
+  {
+    type:"space", category:"Introduction",
+    title:"Exploring Venus",
+    subtitle:"A Mission Plan by Quy Anh Nguyen and Huyen Tien",
+    text:"Welcome to our presentation.\nToday, we will take you through our mission plan to explore Venus — one of the most mysterious and extreme planets in our Solar System.",
+    cam:new THREE.Vector3(22,8,24), look:new THREE.Vector3(0,0,0),
+    enter(){rocket.visible=true;orbiter.visible=false;probe.visible=false;routeLine.visible=false;}
+  },
+  // ── 2 ── WHY EXPLORE SPACE
+  {
+    type:"space", category:"Background",
+    title:"Why Do We Explore Space?",
+    subtitle:"Understanding the universe around us",
+    text:"Space exploration helps us understand where we come from and how planets form.\n\nIt drives new technology — satellites, computers, and medical tools have all come from space research.\n\nMost importantly, it answers one of the greatest questions:\nAre we alone?",
+    cam:new THREE.Vector3(60,35,200), look:new THREE.Vector3(50,0,0),
+    enter(){rocket.visible=false;orbiter.visible=false;probe.visible=false;routeLine.visible=false;}
+  },
+  // ── 3 ── WHY VENUS (3D close-up)
+  {
+    type:"space", category:"Target Planet",
+    title:"Why Venus?",
+    subtitle:"Earth's twin — gone terribly wrong",
+    text:"Venus is almost the same size as Earth, but the two planets evolved very differently.\n\nVenus has:\n• Surface temperature: 465°C (hot enough to melt lead)\n• Atmospheric pressure: 92× Earth's (like 900 m underwater)\n• Clouds of sulfuric acid\n\nUnderstanding Venus tells us how a planet like Earth can become a nightmare.",
+    cam:new THREE.Vector3(VP.x+8,VP.y+12,VP.z+38), look:new THREE.Vector3(VP.x,0,0),
+    enter(){rocket.visible=false;orbiter.visible=false;probe.visible=false;routeLine.visible=false;}
+  },
+  // ── 4 ── VENUS IMAGE 1
+  {
+    type:"venus",
+    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg",
+    imgTitle:"Venus — True Colour",
+    imgText:"This is Venus as captured by NASA's Mariner 10 spacecraft. The thick cloud cover is made of sulfuric acid droplets and completely hides the surface from normal cameras.",
+  },
+  // ── 5 ── VENUS IMAGE 2 (surface radar)
+  {
+    type:"venus",
+    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/8/8a/Magellan_-_Full_Resolution_Radar_Mosaic_of_Venus_in_Sinusoidal_Equal-Area_Projection.jpg",
+    imgTitle:"Venus Surface — Radar Map by Magellan",
+    imgText:"Because Venus is covered by clouds, we use radar to see the surface. NASA's Magellan mission (1990–1994) mapped over 98% of Venus. It revealed thousands of volcanoes, vast lava plains, and mountain ranges.",
+  },
+  // ── 6 ── VENUS IMAGE 3 (volcano / surface art)
+  {
+    type:"venus",
+    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/PIA00271.jpg/1280px-PIA00271.jpg",
+    imgTitle:"Volcanic Landscape of Venus",
+    imgText:"Scientists believe Venus may still have active volcanoes today. The surface is covered in lava flows and volcanic craters. High temperatures and pressure make it one of the most hostile surfaces in the Solar System.",
+  },
+  // ── 7 ── WHAT CAN WE DISCOVER
+  {
+    type:"space", category:"Science Goals",
+    title:"What Can We Discover?",
+    subtitle:"Key questions our mission will answer",
+    text:"Our mission focuses on three main scientific goals:\n\n① Is Venus still volcanically active today?\n② Did Venus once have oceans of liquid water?\n③ What caused its runaway greenhouse effect — and could Earth suffer the same fate?\n\nAnswering these helps us protect our own planet.",
+    cam:new THREE.Vector3(VP.x+5,VP.y+10,VP.z+32), look:new THREE.Vector3(VP.x,0,0),
+    enter(){rocket.visible=false;orbiter.visible=false;probe.visible=false;routeLine.visible=false;}
+  },
+  // ── 8 ── RISKS & DANGERS
+  {
+    type:"space", category:"Challenges",
+    title:"Risks & Dangers",
+    subtitle:"Why Venus is the hardest planet to explore",
+    text:"Venus destroys spacecraft very quickly:\n\n🌡 Extreme heat (465°C) melts most electronics\n⚠ Crushing pressure — 92× Earth's atmosphere\n☁ Sulfuric acid clouds corrode metal and sensors\n💨 Hurricane-force winds at cloud level (360 km/h)\n\nThe Soviet Venera probes lasted only 23–127 minutes on the surface. Our spacecraft must be specially built to survive.",
+    cam:new THREE.Vector3(VP.x+12,VP.y+6,VP.z+22), look:new THREE.Vector3(VP.x,0,0),
+    enter(){rocket.visible=false;orbiter.visible=false;probe.visible=false;routeLine.visible=false;}
+  },
+  // ── 9 ── EQUIPMENT
+  {
+    type:"space", category:"Equipment",
+    title:"Mission Equipment",
+    subtitle:"What we bring and why",
+    text:"Our spacecraft carries three main components:\n\n🚀 Launch Rocket — carries everything into space\n🛰 Orbiter — stays in orbit around Venus; maps the surface and relays data back to Earth\n🔬 Atmospheric Probe — descends through the clouds; measures temperature, pressure, and chemistry\n\nAll components are made from titanium alloys and ceramic heat shields to survive Venus's conditions.",
+    cam:new THREE.Vector3(VP.x-5,VP.y+18,VP.z+70), look:new THREE.Vector3(VP.x-10,2,0),
+    enter(){rocket.visible=true;orbiter.visible=true;probe.visible=true;routeLine.visible=false;}
+  },
+  // ── 10 ── MISSION PLAN / TRAJECTORY
+  {
+    type:"space", category:"Mission Plan",
+    title:"The Journey: Earth to Venus",
+    subtitle:"How we get there",
+    text:"The mission follows a Hohmann transfer orbit — a fuel-efficient curved path between Earth and Venus.\n\nTravel time: approximately 3–5 months.\n\nUpon arrival, the spacecraft fires its engine to enter Venus orbit. The probe then separates and begins its descent.",
+    cam:new THREE.Vector3(-12,28,90), look:new THREE.Vector3(-22,2,0),
+    enter(){rocket.visible=true;orbiter.visible=false;probe.visible=false;routeLine.visible=true;}
+  },
+  // ── 11 ── LAUNCH
+  {
+    type:"space", category:"Phase 1 — Launch",
+    title:"Phase 1: Launch",
+    subtitle:"Lifting off from Earth",
+    text:"The rocket launches from Earth carrying the orbiter and probe stacked together.\n\nKey launch facts:\n• Rocket height: ~70 m (similar to a 20-storey building)\n• Thrust: 7–8 million Newtons\n• Time to orbit: ~9 minutes\n\nThe rocket's first stage lands back for reuse. The upper stage continues toward Venus.",
+    cam:new THREE.Vector3(earth.position.x+8,earth.position.y+12,earth.position.z+24), look:new THREE.Vector3(earth.position.x,0,0),
+    enter(){rocket.visible=true;orbiter.visible=false;probe.visible=false;routeLine.visible=false;}
+  },
+  // ── 12 ── ORBITER
+  {
+    type:"space", category:"Phase 2 — Orbiter",
+    title:"Phase 2: The Orbiter",
+    subtitle:"Mapping Venus from above",
+    text:"The orbiter circles Venus every ~24 hours.\n\nIts instruments include:\n• SAR radar camera — maps the surface through clouds\n• Infrared spectrometer — detects volcanic heat signatures\n• Magnetometer — measures Venus's magnetic field\n• High-gain antenna — transmits data back to Earth\n\nIt will work for at least 3 years in orbit.",
+    cam:new THREE.Vector3(VP.x+4,VP.y+12,VP.z+22), look:new THREE.Vector3(VP.x,0,0),
+    enter(){rocket.visible=false;orbiter.visible=true;probe.visible=false;routeLine.visible=false;}
+  },
+  // ── 13 ── PROBE DESCENT
+  {
+    type:"space", category:"Phase 3 — Probe",
+    title:"Phase 3: Atmospheric Probe Entry",
+    subtitle:"Descending through the clouds of Venus",
+    text:"The probe separates from the orbiter and begins its descent:\n\n① Heat shield protects it during entry (up to 11,000°C plasma)\n② Parachute deploys at 70 km altitude in the cloud layer\n③ Parachute is released at 40 km — winds here reach 360 km/h\n④ The probe freefalls through the lower atmosphere\n⑤ It reaches the surface after ~60 minutes\n\nThe probe transmits data the entire way down.",
+    cam:new THREE.Vector3(VP.x+18,VP.y+2,VP.z+14), look:new THREE.Vector3(VP.x,-4,0),
+    enter(){rocket.visible=false;orbiter.visible=false;probe.visible=true;routeLine.visible=false;}
+  },
+  // ── 14 ── PROBE SURFACE
+  {
+    type:"space", category:"Phase 3 — Probe",
+    title:"On the Surface of Venus",
+    subtitle:"The probe's final moments",
+    text:"Once on the surface, the probe has only minutes before the extreme heat destroys it.\n\nIn those final minutes it measures:\n• Exact surface temperature and pressure\n• Chemical composition of rocks and soil\n• Wind speed at ground level\n• Seismic vibrations (possible volcanism)\n\nAll data is sent to the orbiter, which relays it to Earth.",
+    cam:new THREE.Vector3(VP.x+22,VP.y-3,VP.z+10), look:new THREE.Vector3(VP.x,-6,0),
+    enter(){rocket.visible=false;orbiter.visible=false;probe.visible=true;routeLine.visible=false;}
+  },
+  // ── 15 ── SPECIALISTS
+  {
+    type:"space", category:"The Team",
+    title:"Mission Specialists",
+    subtitle:"Who makes this mission possible",
+    text:"A successful Venus mission needs many experts:\n\n🔧 Aerospace Engineers — design spacecraft to survive Venus\n🧪 Planetary Scientists — analyse the data collected\n💻 Flight Controllers — monitor and command the spacecraft daily\n📡 Communications Engineers — maintain the radio link across millions of km\n🧠 Astrobiologists — search for signs of past life\n\nHundreds of people work together for years before launch.",
+    cam:new THREE.Vector3(30,20,130), look:new THREE.Vector3(10,0,0),
+    enter(){rocket.visible=false;orbiter.visible=true;probe.visible=false;routeLine.visible=false;}
+  },
+  // ── 16 ── VENUS IMAGE 4 (Venera lander)
+  {
+    type:"venus",
+    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Venera_13_leg.jpg/1280px-Venera_13_leg.jpg",
+    imgTitle:"Venera 13 — First Colour Photos from Venus (1982)",
+    imgText:"The Soviet Venera 13 probe took the first colour photos from the Venusian surface in 1982. It survived for 127 minutes. The orange sky is caused by the thick atmosphere filtering sunlight. Rocky slabs cover the ground.",
+  },
+  // ── 17 ── WHY IT MATTERS
+  {
+    type:"space", category:"Why It Matters",
+    title:"Why This Mission Matters",
+    subtitle:"Lessons for Earth",
+    text:"Venus is a warning about climate change.\n\nBillions of years ago, Venus may have been similar to Earth — possibly with oceans and a milder climate. Something went wrong and triggered a runaway greenhouse effect.\n\nBy studying what happened to Venus, we can:\n• Better predict climate change on Earth\n• Learn how to protect our own atmosphere\n• Understand what makes a planet truly habitable",
+    cam:new THREE.Vector3(VP.x+6,VP.y+16,VP.z+55), look:new THREE.Vector3(VP.x-8,0,0),
+    enter(){rocket.visible=false;orbiter.visible=true;probe.visible=false;routeLine.visible=false;}
+  },
+  // ── 18 ── FUTURE
+  {
+    type:"space", category:"The Future",
+    title:"The Future of Venus Exploration",
+    subtitle:"What comes next",
+    text:"NASA and ESA have already approved new Venus missions:\n\n🛸 DAVINCI+ (NASA) — probe descending through the atmosphere\n🛸 VERITAS (NASA) — high-resolution radar mapping\n🛸 EnVision (ESA) — studying Venus's geology and climate history\n\nOur mission fits into this exciting new era. Venus is no longer forgotten — it is the next great frontier.",
+    cam:new THREE.Vector3(VP.x+4,VP.y+20,VP.z+80), look:new THREE.Vector3(VP.x,0,0),
+    enter(){rocket.visible=false;orbiter.visible=true;probe.visible=true;routeLine.visible=false;}
+  },
+  // ── 19 ── CONCLUSION
+  {
+    type:"space", category:"Conclusion",
+    title:"Conclusion",
+    subtitle:"Venus is dangerous — but it holds our answers",
+    text:"In conclusion:\n\n✦ Venus is the most extreme planet near Earth\n✦ It can teach us about climate, atmosphere, and planetary evolution\n✦ Our mission sends an orbiter to map it and a probe to measure its atmosphere\n✦ Despite the dangers, the science is worth it\n\nExploring Venus means understanding Earth — and perhaps protecting our future.",
+    cam:new THREE.Vector3(VP.x+12,VP.y+18,VP.z+95), look:new THREE.Vector3(VP.x,0,0),
+    enter(){rocket.visible=false;orbiter.visible=true;probe.visible=true;routeLine.visible=false;}
+  },
+  // ── 20 ── THANK YOU
+  {
+    type:"space", category:"",
+    title:"Thank You",
+    subtitle:"Quy Anh Nguyen and Huyen Tien",
+    text:"Thank you for listening to our mission plan.\n\nWe hope you now understand why Venus is so important to study, and how our spacecraft will survive one of the most extreme environments in the Solar System.\n\nAny questions?",
+    cam:new THREE.Vector3(18,12,130), look:new THREE.Vector3(VP.x,0,0),
+    enter(){rocket.visible=false;orbiter.visible=false;probe.visible=false;routeLine.visible=false;}
+  },
+];
+
+// ══════════════════════════════════════════════════════════
+//  DOM REFS
+// ══════════════════════════════════════════════════════════
+const panel         = document.getElementById("panel");
+const sceneTypeEl   = document.getElementById("sceneType");
+const titleEl       = document.getElementById("title");
+const subtitleEl    = document.getElementById("subtitle");
+const bodyTextEl    = document.getElementById("bodyText");
+const counterEl     = document.getElementById("sceneCounter");
+const venusScene    = document.getElementById("venusImageScene");
+const venusImg      = document.getElementById("venusImg");
+const venusImgTitle = document.getElementById("venusImgTitle");
+const venusImgText  = document.getElementById("venusImgText");
+
+let cur = 0;
+const camTarget  = SCENES[0].cam.clone();
+const lookTarget = SCENES[0].look.clone();
+
+function goTo(i){
+  cur = Math.max(0, Math.min(i, SCENES.length-1));
+  const s = SCENES[cur];
+
+  // ── Venus full-screen image scene ──
+  if(s.type === "venus"){
+    venusImg.classList.remove("loaded");
+    venusImgTitle.textContent = s.imgTitle;
+    venusImgText.textContent  = s.imgText;
+    venusImg.src = s.imgSrc;
+    venusImg.onload = () => venusImg.classList.add("loaded");
+    venusScene.classList.add("active");
+    panel.classList.add("hidden");
+    counterEl.textContent = "Scene "+(cur+1)+" / "+SCENES.length;
+    return;
+  }
+
+  // ── 3D Space scene ──
+  venusScene.classList.remove("active");
+  camTarget.copy(s.cam);
+  lookTarget.copy(s.look);
+  if(s.enter) s.enter();
+
+  panel.classList.add("hidden");
+  setTimeout(()=>{
+    sceneTypeEl.textContent = s.category || "";
+    titleEl.textContent     = s.title;
+    subtitleEl.textContent  = s.subtitle || "";
+    bodyTextEl.textContent  = s.text || "";
+    counterEl.textContent   = "Scene "+(cur+1)+" / "+SCENES.length;
+    panel.classList.remove("hidden");
+  }, 220);
+}
+
+goTo(0);
+
+window.addEventListener("keydown", e=>{
+  if(e.code==="Space")     { e.preventDefault(); goTo(cur+1); }
+  if(e.code==="ArrowRight"){ goTo(cur+1); }
+  if(e.code==="ArrowLeft") { goTo(cur-1); }
+});
+window.addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+
+// ══════════════════════════════════════════════════════════
+//  ANIMATION
+// ══════════════════════════════════════════════════════════
+const clock = new THREE.Clock();
+// probe entry animation state
+let probeInsideVenus = false;
+
+function animate(){
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Smooth camera
+  camera.position.lerp(camTarget, 0.030);
+  controls.target.lerp(lookTarget, 0.045);
+  controls.update();
+
+  // Star slow drift
+  window._stars.rotation.y += 0.000055;
+
+  // Planet rotations
+  mercury.rotation.y  += 0.0040;
+  venus.rotation.y    += 0.0014;
+  venusAtmo.rotation.y+= 0.0028;
+  earth.rotation.y    += 0.0068;
+  earthCloud.rotation.y+=0.0088;
+  mars.rotation.y     += 0.0050;
+  jupiter.rotation.y  += 0.0160;
+  saturn.rotation.y   += 0.0115;
+  uranus.rotation.y   += 0.0078;
+  neptune.rotation.y  += 0.0068;
+
+  // Moon elliptical orbit
+  moon.position.set(
+    earth.position.x + Math.cos(t*1.1)*13.5,
+    Math.sin(t*0.28)*0.9,
+    earth.position.z + Math.sin(t*1.1)*13.5
+  );
+
+  // ORBITER — elliptical inclined orbit around Venus
+  if(orbiter.visible){
+    const orb_a=18, orb_b=14;
+    orbiter.position.set(
+      venus.position.x + Math.cos(t*0.85)*orb_a,
+      Math.sin(t*0.55)*4.5,
+      Math.sin(t*0.85)*orb_b
+    );
+    orbiter.lookAt(venus.position);
+    orbiter.rotateZ(0.004);
+  }
+
+  // PROBE — entry animation through Venus atmosphere
+  if(probe.visible){
+    const s = SCENES[cur];
+    if(s && s.category && s.category.includes("Probe")){
+      // Spiral descent into Venus
+      const descent_t = (t * 0.55) % (Math.PI*2);
+      const altitude  = 14 - (t * 0.9) % 18; // oscillates for presentation
+      const spiral_r  = Math.max(0, altitude * 0.55);
+      probe.position.set(
+        venus.position.x + Math.cos(descent_t) * spiral_r,
+        altitude - 2,
+        venus.position.z + Math.sin(descent_t) * spiral_r * 0.4
       );
-      sun.position.set(-140, 30, 0);
-      [18, 22, 28].forEach((r, i) => {
-        const corona = new THREE.Mesh(
-          new THREE.SphereGeometry(r, 32, 32),
-          new THREE.MeshBasicMaterial({
-            color: [0xffaa22, 0xff8800, 0xff5500][i],
-            transparent: true, opacity: [0.22, 0.10, 0.04][i]
-          })
-        );
-        corona.position.copy(sun.position);
-        g.add(corona);
-      });
-      g.add(sun);
-      scene.add(g);
-    })();
-
-    // ─── PLANET FACTORY ──────────────────────────────────────────
-    const planetGroup = new THREE.Group();
-    scene.add(planetGroup);
-
-    function makePlanet(radius, tex, x, opts) {
-      opts = opts || {};
-      const mat = new THREE.MeshStandardMaterial({
-        map: tex, roughness: opts.roughness != null ? opts.roughness : 0.88,
-        metalness: opts.metalness || 0
-      });
-      const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 80, 80), mat);
-      mesh.position.set(x, 0, 0);
-      planetGroup.add(mesh);
-      return mesh;
+      probe.rotation.y += 0.012;
+      probe.rotation.z  = Math.sin(t*0.8)*0.12; // slight wobble
+    } else {
+      // Default resting position near Venus
+      const descend = 10 - (t*1.1 % 12);
+      probe.position.set(venus.position.x+9, descend-2, 2);
+      probe.rotation.y += 0.008;
     }
+  }
 
-    function addGlow(parent, r, color, opacity) {
-      parent.add(new THREE.Mesh(
-        new THREE.SphereGeometry(r, 32, 32),
-        new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: opacity, depthWrite: false })
-      ));
-    }
-
-    // Mercury
-    const mercury = makePlanet(2.4, T.mercury, -70, { roughness: 0.95 });
-
-    // Venus with atmosphere layers
-    const venus = new THREE.Mesh(
-      new THREE.SphereGeometry(6.8, 128, 128),
-      new THREE.MeshStandardMaterial({ map: T.venusS, roughness: 0.9 })
-    );
-    venus.position.set(-40, 0, 0);
-    planetGroup.add(venus);
-    const venusAtmo = new THREE.Mesh(
-      new THREE.SphereGeometry(7.1, 64, 64),
-      new THREE.MeshStandardMaterial({ map: T.venus, transparent: true, opacity: 0.78, roughness: 1, depthWrite: false })
-    );
-    venus.add(venusAtmo);
-    addGlow(venus, 7.7,  0xffb84d, 0.16);
-    addGlow(venus, 8.4,  0xff9922, 0.07);
-    addGlow(venus, 9.2,  0xff7700, 0.03);
-
-    // Earth
-    const earth = makePlanet(7.2, T.earth, 0);
-    const earthCloud = new THREE.Mesh(
-      new THREE.SphereGeometry(7.36, 64, 64),
-      new THREE.MeshStandardMaterial({ map: T.earthC, transparent: true, opacity: 0.38, depthWrite: false })
-    );
-    earth.add(earthCloud);
-    addGlow(earth, 7.9, 0x4499ff, 0.08);
-
-    // Moon
-    const moon = new THREE.Mesh(
-      new THREE.SphereGeometry(1.96, 32, 32),
-      new THREE.MeshStandardMaterial({ map: T.moon, roughness: 0.95 })
-    );
-    scene.add(moon);
-
-    // Mars
-    const mars = makePlanet(4.2, T.mars, 40, { roughness: 0.92 });
-    addGlow(mars, 4.45, 0xcc5533, 0.06);
-
-    // Jupiter
-    const jupiter = makePlanet(11, T.jupiter, 110, { roughness: 0.75 });
-
-    // Saturn + multi-ring system
-    const saturn = makePlanet(9.4, T.saturn, 170, { roughness: 0.8 });
-    [
-      { inner: 11.5, outer: 14.5, opacity: 0.80 },
-      { inner: 14.8, outer: 17.5, opacity: 0.55 },
-      { inner: 17.8, outer: 19.2, opacity: 0.30 },
-    ].forEach(function(d) {
-      const rg  = new THREE.RingGeometry(d.inner, d.outer, 128);
-      const pos = rg.attributes.position;
-      const uv  = rg.attributes.uv;
-      for (let i = 0; i < pos.count; i++) {
-        const x = pos.getX(i), z = pos.getZ(i);
-        const r = Math.sqrt(x*x + z*z);
-        uv.setXY(i, (r - d.inner) / (d.outer - d.inner), 0);
-      }
-      const ring = new THREE.Mesh(rg, new THREE.MeshBasicMaterial({
-        map: T.saturnR, side: THREE.DoubleSide, transparent: true, opacity: d.opacity
-      }));
-      ring.rotation.x = Math.PI / 2.5;
-      saturn.add(ring);
-    });
-
-    // Uranus + thin rings
-    const uranus = makePlanet(7.6, T.uranus, 230, { roughness: 0.6, metalness: 0.05 });
-    addGlow(uranus, 8.1, 0x88ddcc, 0.06);
-    const uRing = new THREE.Mesh(
-      new THREE.RingGeometry(9.5, 10.8, 64),
-      new THREE.MeshBasicMaterial({ color: 0xaacccc, side: THREE.DoubleSide, transparent: true, opacity: 0.22 })
-    );
-    uRing.rotation.x = Math.PI / 2;
-    uRing.rotation.z = Math.PI / 1.4;
-    uranus.add(uRing);
-
-    // Neptune
-    const neptune = makePlanet(7.4, T.neptune, 290, { roughness: 0.65, metalness: 0.05 });
-    addGlow(neptune, 7.9, 0x3355ff, 0.07);
-
-    // ─── SPACECRAFT: ROCKET ──────────────────────────────────────
-    function makeRocket() {
-      const g = new THREE.Group();
-      const MAT = {
-        silver: new THREE.MeshStandardMaterial({ color: 0xdde0e8, roughness: 0.45, metalness: 0.7 }),
-        red:    new THREE.MeshStandardMaterial({ color: 0xff3322, roughness: 0.5,  metalness: 0.3 }),
-        dark:   new THREE.MeshStandardMaterial({ color: 0x333340, roughness: 0.6,  metalness: 0.5 }),
-        gold:   new THREE.MeshStandardMaterial({ color: 0xffbb33, roughness: 0.4,  metalness: 0.6 }),
-      };
-      // Stages
-      const s1   = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.15, 4.5, 24), MAT.silver);
-      s1.position.y = -1;
-      const ring = new THREE.Mesh(new THREE.CylinderGeometry(1.12, 1.12, 0.28, 24), MAT.dark);
-      ring.position.y = 1.65;
-      const s2   = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.1, 3.0, 24), MAT.silver);
-      s2.position.y = 3.25;
-      const s3   = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.85, 2.2, 24), MAT.silver);
-      s3.position.y = 5.95;
-      const nose = new THREE.Mesh(new THREE.ConeGeometry(0.65, 2.2, 24), MAT.red);
-      nose.position.y = 8.2;
-      // Payload fairing halves
-      const far1 = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.66, 1.8, 24, 1, false, 0, Math.PI), MAT.red);
-      far1.position.y = 7.05;
-      const far2 = far1.clone(); far2.rotation.y = Math.PI;
-      // Grid fins
-      for (let i = 0; i < 4; i++) {
-        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.9, 0.7), MAT.dark);
-        fin.position.set(Math.cos(i*Math.PI/2)*1.22, 0.2, Math.sin(i*Math.PI/2)*1.22);
-        fin.rotation.y = i*Math.PI/2;
-        g.add(fin);
-      }
-      // Landing legs
-      for (let i = 0; i < 4; i++) {
-        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.8, 8), MAT.silver);
-        leg.position.set(Math.cos(i*Math.PI/2+Math.PI/4)*1.05, -2.8, Math.sin(i*Math.PI/2+Math.PI/4)*1.05);
-        leg.rotation.z =  Math.cos(i*Math.PI/2+Math.PI/4) * 0.45;
-        leg.rotation.x = -Math.sin(i*Math.PI/2+Math.PI/4) * 0.45;
-        g.add(leg);
-      }
-      // Engine bells
-      for (let i = 0; i < 3; i++) {
-        const bell = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.48, 0.7, 16, 1, true), MAT.dark);
-        bell.position.set(Math.cos(i*Math.PI*2/3)*0.55, -3.5, Math.sin(i*Math.PI*2/3)*0.55);
-        g.add(bell);
-      }
-      // Gold thermal band + window
-      const blanket = new THREE.Mesh(new THREE.CylinderGeometry(0.87, 0.87, 0.5, 24), MAT.gold);
-      blanket.position.y = 5.0;
-      const win = new THREE.Mesh(new THREE.CircleGeometry(0.22, 16), new THREE.MeshBasicMaterial({ color: 0x88ccff }));
-      win.position.set(0.87, 5.9, 0); win.rotation.y = Math.PI/2;
-      g.add(s1, ring, s2, s3, nose, far1, far2, blanket, win);
-      g.visible = false;
-      scene.add(g);
-      return g;
-    }
-
-    // ─── SPACECRAFT: ORBITER ─────────────────────────────────────
-    function makeOrbiter() {
-      const g = new THREE.Group();
-      const MAT = {
-        silver: new THREE.MeshStandardMaterial({ color: 0xc8cdd8, roughness: 0.3, metalness: 0.8 }),
-        gold:   new THREE.MeshStandardMaterial({ color: 0xffcc44, roughness: 0.35, metalness: 0.7 }),
-        dark:   new THREE.MeshStandardMaterial({ color: 0x222230, roughness: 0.5, metalness: 0.6 }),
-        blue:   new THREE.MeshStandardMaterial({ color: 0x1144cc, roughness: 0.2, metalness: 0.5 }),
-        white:  new THREE.MeshStandardMaterial({ color: 0xf0f0f0, roughness: 0.6 }),
-      };
-      // Hexagonal bus body
-      const body     = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 1.1, 6), MAT.silver);
-      const topPanel = new THREE.Mesh(new THREE.CylinderGeometry(1.42, 1.42, 0.12, 6), MAT.gold);
-      topPanel.position.y = 0.61;
-      const botPanel = topPanel.clone(); botPanel.position.y = -0.61;
-      // High-gain dish
-      const dishRim  = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.07, 12, 40), MAT.silver);
-      dishRim.rotation.x = Math.PI/2; dishRim.position.set(0, 0, 3.5);
-      const dishSurf = new THREE.Mesh(
-        new THREE.SphereGeometry(1.3, 24, 24, 0, Math.PI*2, 0, Math.PI/3),
-        new THREE.MeshStandardMaterial({ color: 0xddddee, roughness: 0.3, metalness: 0.6, side: THREE.DoubleSide })
+  // ROCKET
+  if(rocket.visible){
+    if(cur === 0 || cur === 1){
+      // Orbit around Earth
+      rocket.position.set(
+        earth.position.x + Math.cos(t*0.42)*12,
+        Math.sin(t*0.22)*2,
+        earth.position.z + Math.sin(t*0.42)*12
       );
-      dishSurf.rotation.x = -Math.PI/2; dishSurf.position.set(0, 0, 3.5);
-      const dishFeed = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.8, 8), MAT.silver);
-      dishFeed.position.set(0, 0.5, 3.5);
-      // Dish struts
-      for (let i = 0; i < 3; i++) {
-        const s = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.4, 6), MAT.silver);
-        s.position.set(Math.cos(i*Math.PI*2/3)*0.5, 0.35, 2.9);
-        s.rotation.x = Math.PI/2 - 0.4;
-        s.rotation.z = i*Math.PI*2/3;
-        g.add(s);
-      }
-      // Solar arrays (2 wings, 2 panels each)
-      for (let side = -1; side <= 1; side += 2) {
-        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3.8, 8), MAT.silver);
-        mast.rotation.z = Math.PI/2; mast.position.set(side * 2.8, 0, 0);
-        g.add(mast);
-        for (let p = 0; p < 2; p++) {
-          const panel = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.06, 1.4), MAT.blue);
-          panel.position.set(side * (3.8 + p*2.8), 0, 0);
-          // Cell grid lines
-          for (let row = -2; row <= 2; row++) {
-            const gr = new THREE.Mesh(new THREE.BoxGeometry(2.58, 0.07, 0.05), new THREE.MeshBasicMaterial({ color: 0x223388 }));
-            gr.position.set(side*(3.8+p*2.8), 0.05, row*0.25);
-            g.add(gr);
-          }
-          g.add(panel);
-        }
-      }
-      // Science instruments
-      const instBase = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 0.8), MAT.dark);
-      instBase.position.y = 0.85;
-      for (let i = 0; i < 3; i++) {
-        const inst = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.35, 10), i < 2 ? MAT.dark : MAT.white);
-        inst.position.set((i-1)*0.28, 1.22, 0);
-        const lens = new THREE.Mesh(new THREE.CircleGeometry(0.1, 12), new THREE.MeshBasicMaterial({ color: 0x88aacc }));
-        lens.position.set((i-1)*0.28, 1.42, 0); lens.rotation.x = -Math.PI/2;
-        g.add(inst, lens);
-      }
-      // Thrusters
-      for (let i = 0; i < 4; i++) {
-        const thr = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 0.3, 10, 1, true), MAT.dark);
-        thr.position.set(Math.cos(i*Math.PI/2)*1.5, -0.45, Math.sin(i*Math.PI/2)*1.5);
-        thr.rotation.x = Math.PI/2; thr.rotation.y = i*Math.PI/2;
-        g.add(thr);
-      }
-      // Magnetometer boom
-      const boom = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.5, 6), MAT.silver);
-      boom.rotation.z = Math.PI/2; boom.position.set(0, 0.55, -2.8); boom.rotation.x = -0.3;
-      const magHead = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.3), MAT.dark);
-      magHead.position.set(0, 1.0, -4.0);
-      const tracker = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.4), MAT.dark);
-      tracker.position.set(-1.2, 0.55, 0.5); tracker.rotation.z = 0.4;
-      g.add(body, topPanel, botPanel, dishRim, dishSurf, dishFeed, instBase, boom, magHead, tracker);
-      g.visible = false;
-      scene.add(g);
-      return g;
-    }
-
-    // ─── SPACECRAFT: PROBE ───────────────────────────────────────
-    function makeProbe() {
-      const g = new THREE.Group();
-      const MAT = {
-        silver: new THREE.MeshStandardMaterial({ color: 0xbbbbcc, roughness: 0.4, metalness: 0.7 }),
-        gold:   new THREE.MeshStandardMaterial({ color: 0xdd9922, roughness: 0.5, metalness: 0.6 }),
-        dark:   new THREE.MeshStandardMaterial({ color: 0x111118, roughness: 0.7 }),
-        heat:   new THREE.MeshStandardMaterial({ color: 0x553322, roughness: 0.9 }),
-        white:  new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.6 }),
-      };
-      // Heat shield
-      const shield    = new THREE.Mesh(new THREE.ConeGeometry(2.2, 1.2, 32), MAT.heat);
-      shield.position.y = -1.4; shield.rotation.x = Math.PI;
-      const shieldRim = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.12, 8, 40), MAT.heat);
-      shieldRim.position.y = -1.4; shieldRim.rotation.x = Math.PI/2;
-      // Pressure vessel
-      const vessel = new THREE.Mesh(new THREE.SphereGeometry(1.55, 40, 40), MAT.silver);
-      vessel.position.y = 0.15;
-      // Gold foil bands
-      for (let y of [-0.3, 0.2, 0.7]) {
-        const band = new THREE.Mesh(new THREE.TorusGeometry(1.56, 0.09, 8, 36), MAT.gold);
-        band.position.y = y; band.rotation.x = Math.PI/2;
-        g.add(band);
-      }
-      // Backshell dome
-      const backshell = new THREE.Mesh(
-        new THREE.SphereGeometry(1.6, 32, 32, 0, Math.PI*2, 0, Math.PI/2.2), MAT.white
+      rocket.rotation.y += 0.010;
+    } else if(cur === 8){
+      // Scene 9: show all 3 spacecraft near Venus, spread out
+      rocket.position.set(venus.position.x+5, 8, 6);
+      rocket.rotation.y += 0.008;
+    } else if(cur === 9){
+      // Scene 10: transit arc
+      const tr=(Math.sin(t*0.45)+1)/2;
+      const p0=new THREE.Vector3(0,0,0), p1=new THREE.Vector3(-21,24,-14), p2=new THREE.Vector3(-42,0,0);
+      const a=p0.clone().lerp(p1,tr), b=p1.clone().lerp(p2,tr);
+      rocket.position.copy(a.lerp(b,tr));
+      rocket.rotation.z=-0.65; rocket.rotation.y+=0.018;
+    } else if(cur === 10){
+      // Scene 11: near Earth launching
+      rocket.position.set(
+        earth.position.x + Math.cos(t*0.38)*10.5,
+        Math.sin(t*0.38)*1.5 + 2,
+        earth.position.z + Math.sin(t*0.38)*10.5
       );
-      backshell.rotation.x = Math.PI; backshell.position.y = 1.2;
-      // Parachute deploy tube
-      const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.8, 16), MAT.dark);
-      tube.position.y = 2.5;
-      const tubeCap = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.4, 16), MAT.dark);
-      tubeCap.position.y = 3.05;
-      // Sensors
-      [[0,1.55,0],[1.1,0.9,0.8],[-1.0,0.5,1.0]].forEach(function(p) {
-        const s = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.4, 8), MAT.dark);
-        s.position.set(p[0], p[1], p[2]);
-        s.lookAt(0, 0, 0); s.rotateX(Math.PI/2);
-        g.add(s);
-      });
-      // Radio whip antenna
-      const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.01, 2.2, 6), MAT.silver);
-      ant.position.set(0.8, 2.2, 0); ant.rotation.z = 0.3;
-      g.add(shield, shieldRim, vessel, backshell, tube, tubeCap, ant);
-      g.visible = false;
-      scene.add(g);
-      return g;
+      rocket.rotation.y += 0.012;
     }
+  }
 
-    const rocket  = makeRocket();
-    const orbiter = makeOrbiter();
-    const probe   = makeProbe();
+  renderer.render(scene3D, camera);
+}
 
-    // Travel route (bezier-ish arc)
-    const routePts = [];
-    for (let i = 0; i <= 60; i++) {
-      const t  = i / 60;
-      const p0 = new THREE.Vector3(0, 0, 0);
-      const p1 = new THREE.Vector3(-20, 22, -12);
-      const p2 = new THREE.Vector3(-40, 0, 0);
-      const a  = p0.clone().lerp(p1, t);
-      const b  = p1.clone().lerp(p2, t);
-      routePts.push(a.lerp(b, t));
-    }
-    const routeLine = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(routePts),
-      new THREE.LineBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.5 })
-    );
-    routeLine.visible = false;
-    planetGroup.add(routeLine);
-
-    // ─── SCENE DATA ──────────────────────────────────────────────
-    const panel      = document.getElementById("panel");
-    const titleEl    = document.getElementById("title");
-    const subtitleEl = document.getElementById("subtitle");
-    const bodyTextEl = document.getElementById("bodyText");
-    const counterEl  = document.getElementById("sceneCounter");
-    const galleryEl  = document.getElementById("venusGallery");
-
-    const SCENES = [
-      {
-        title: "Mission Preparation",
-        subtitle: "Mission Plan by Quy Anh Nguyen and Huyen Tien",
-        text: "First, we prepare the mission on Earth.\n\nWe choose:\n- a rocket to launch\n- an orbiter to stay around Venus\n- a probe to go into the atmosphere\n\nThe specialists we bring are:\n- engineers\n- scientists\n- mission controllers",
-        cam: new THREE.Vector3(18, 6, 20), look: new THREE.Vector3(0, 0, 0),
-        enter: function() { routeLine.visible=false; rocket.visible=true; orbiter.visible=false; probe.visible=false; }
-      },
-      {
-        title: "Exploring Venus",
-        subtitle: "Why we chose Venus",
-        text: "Hello, today we are going to present our mission to explore Venus.\nVenus is one of the most extreme planets in our Solar System.",
-        cam: new THREE.Vector3(12, 8, 26), look: new THREE.Vector3(0, 0, 0),
-        enter: function() { routeLine.visible=false; rocket.visible=true; orbiter.visible=false; probe.visible=false; }
-      },
-      {
-        title: "Why Explore Space?",
-        subtitle: "Learning more about the universe",
-        text: "We explore space to learn more about the universe.\nIt helps us understand how planets are formed.\nWe can also discover new things that we do not know yet.\nSpace exploration also helps us improve technology on Earth.",
-        cam: new THREE.Vector3(40, 30, 180), look: new THREE.Vector3(40, 0, 0),
-        enter: function() { routeLine.visible=false; rocket.visible=false; orbiter.visible=false; probe.visible=false; }
-      },
-      {
-        title: "Why Venus?",
-        subtitle: "A planet like Earth, but very different",
-        text: "Venus is interesting because it is similar to Earth in size.\nBut it is very different in many ways.\nIt has a thick atmosphere and it is extremely hot.\nStudying Venus helps us understand why planets can change so much.",
-        cam: new THREE.Vector3(-15, 12, 42), look: new THREE.Vector3(-40, 0, 0),
-        showImages: true,
-        enter: function() { routeLine.visible=false; rocket.visible=false; orbiter.visible=false; probe.visible=false; }
-      },
-      {
-        title: "What Can We Discover?",
-        subtitle: "Atmosphere, surface, and volcanoes",
-        text: "On Venus, we can study the atmosphere and the weather.\nWe can also learn about the surface and possible volcanoes.\nScientists want to know if Venus had water in the past.\nThis can help us understand how planets change over time.",
-        cam: new THREE.Vector3(-26, 8, 24), look: new THREE.Vector3(-40, 0, 0),
-        showImages: true,
-        enter: function() { routeLine.visible=false; rocket.visible=false; orbiter.visible=false; probe.visible=false; }
-      },
-      {
-        title: "Why Is It Difficult?",
-        subtitle: "A very hard planet to explore",
-        text: "Venus is very hard to explore.\nThe temperature is extremely high.\nThe pressure is very strong.\nThe clouds are also toxic.\nBecause of this, spacecraft cannot stay there for a long time.",
-        cam: new THREE.Vector3(-32, 6, 18), look: new THREE.Vector3(-40, 0, 0),
-        showImages: true,
-        enter: function() { routeLine.visible=false; rocket.visible=false; orbiter.visible=false; probe.visible=false; }
-      },
-      {
-        title: "Mission Plan",
-        subtitle: "Travel from Earth to Venus",
-        text: "Our mission starts from Earth.\nThe spacecraft travels to Venus.\nThen, it splits into two parts.\nAn orbiter stays around Venus, and a probe goes into the atmosphere.\nThe data is sent back to Earth.",
-        cam: new THREE.Vector3(-8, 22, 85), look: new THREE.Vector3(-18, 2, 0),
-        enter: function() { routeLine.visible=true; rocket.visible=true; orbiter.visible=true; probe.visible=true; }
-      },
-      {
-        title: "The Orbiter",
-        subtitle: "Studying Venus from space",
-        text: "The orbiter stays around Venus.\nIt studies the planet from space.\nIt can map the surface and observe changes.\nIt also sends information back to Earth.",
-        cam: new THREE.Vector3(-20, 10, 20), look: new THREE.Vector3(-40, 0, 0),
-        showImages: true,
-        enter: function() { routeLine.visible=false; rocket.visible=false; orbiter.visible=true; probe.visible=false; }
-      },
-      {
-        title: "The Probe",
-        subtitle: "Going down into the atmosphere",
-        text: "The probe goes down into the atmosphere.\nIt measures temperature and pressure.\nIt studies the gases and clouds.\nIt sends data while it is going down.",
-        cam: new THREE.Vector3(-34, 4, 15), look: new THREE.Vector3(-40, -2, 0),
-        showImages: true,
-        enter: function() { routeLine.visible=false; rocket.visible=false; orbiter.visible=false; probe.visible=true; }
-      },
-      {
-        title: "Why This Mission Matters",
-        subtitle: "Venus can teach us about Earth",
-        text: "This mission is important because it helps us understand Earth.\nBy studying Venus, we can learn about climate and how planets change.\nIt also helps scientists study other planets in the future.",
-        cam: new THREE.Vector3(-5, 10, 50), look: new THREE.Vector3(-20, 0, 0),
-        enter: function() { routeLine.visible=false; rocket.visible=false; orbiter.visible=true; probe.visible=false; }
-      },
-      {
-        title: "Conclusion",
-        subtitle: "Venus is dangerous, but important",
-        text: "In conclusion, Venus is an important planet to study.\nEven if it is very dangerous, it can teach us a lot.\nExploring Venus helps us understand our planet and the universe better.",
-        cam: new THREE.Vector3(10, 18, 95), look: new THREE.Vector3(-40, 0, 0),
-        enter: function() { routeLine.visible=false; rocket.visible=false; orbiter.visible=true; probe.visible=true; }
-      },
-      {
-        title: "Thank You",
-        subtitle: "Thank you for listening to us",
-        text: "Thank you for listening to us.\n\nWe hope you learned more about Venus and space exploration.",
-        cam: new THREE.Vector3(18, 10, 120), look: new THREE.Vector3(-40, 0, 0),
-        enter: function() { routeLine.visible=false; rocket.visible=false; orbiter.visible=false; probe.visible=false; }
-      }
-    ];
-
-    let cur = 0;
-    const camTarget  = SCENES[0].cam.clone();
-    const lookTarget = SCENES[0].look.clone();
-
-    function goTo(i) {
-      cur = i;
-      var s = SCENES[i];
-      camTarget.copy(s.cam);
-      lookTarget.copy(s.look);
-      if (s.enter) s.enter();
-      panel.classList.add("fadeOut");
-      setTimeout(function() {
-        titleEl.textContent    = s.title;
-        subtitleEl.textContent = s.subtitle;
-        bodyTextEl.textContent = s.text;
-        counterEl.textContent  = "Scene " + (i+1) + " / " + SCENES.length;
-        galleryEl.style.display = s.showImages ? "flex" : "none";
-        panel.classList.remove("fadeOut");
-      }, 200);
-    }
-
-    goTo(0);
-
-    window.addEventListener("keydown", function(e) {
-      if (e.code === "Space")      { e.preventDefault(); goTo((cur+1) % SCENES.length); }
-      if (e.code === "ArrowRight") { goTo(Math.min(cur+1, SCENES.length-1)); }
-      if (e.code === "ArrowLeft")  { goTo(Math.max(cur-1, 0)); }
-    });
-
-    window.addEventListener("resize", function() {
-      camera.aspect = innerWidth / innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(innerWidth, innerHeight);
-    });
-
-    // ─── ANIMATION ───────────────────────────────────────────────
-    var clock = new THREE.Clock();
-
-    function animate() {
-      requestAnimationFrame(animate);
-      var t = clock.getElapsedTime();
-
-      camera.position.lerp(camTarget, 0.032);
-      controls.target.lerp(lookTarget, 0.048);
-      controls.update();
-
-      mercury.rotation.y  += 0.004;
-      venus.rotation.y    += 0.0016;
-      venusAtmo.rotation.y += 0.003;
-      earth.rotation.y    += 0.007;
-      earthCloud.rotation.y += 0.009;
-      mars.rotation.y     += 0.005;
-      jupiter.rotation.y  += 0.016;
-      saturn.rotation.y   += 0.012;
-      uranus.rotation.y   += 0.008;
-      neptune.rotation.y  += 0.007;
-
-      moon.position.set(
-        earth.position.x + Math.cos(t * 1.15) * 13,
-        Math.sin(t * 0.3) * 0.8,
-        earth.position.z + Math.sin(t * 1.15) * 13
-      );
-
-      if (orbiter.visible) {
-        var r = 17;
-        orbiter.position.set(
-          venus.position.x + Math.cos(t * 0.95) * r,
-          Math.sin(t * 1.5) * 3,
-          Math.sin(t * 0.95) * r
-        );
-        orbiter.lookAt(venus.position);
-        orbiter.rotation.z += 0.005;
-      }
-
-      if (probe.visible) {
-        var descend = 10 - ((t * 1.2) % 12);
-        probe.position.set(venus.position.x + 9, descend - 2, 2);
-        probe.rotation.y += 0.008;
-      }
-
-      if (rocket.visible) {
-        if (cur <= 1) {
-          rocket.position.set(
-            earth.position.x + Math.cos(t * 0.4) * 11,
-            Math.sin(t * 0.2) * 1.5,
-            Math.sin(t * 0.4) * 11
-          );
-          rocket.rotation.y += 0.012;
-        } else if (cur === 6) {
-          var tr = (Math.sin(t * 0.5) + 1) / 2;
-          var p0 = new THREE.Vector3(0, 0, 0);
-          var p1 = new THREE.Vector3(-20, 22, -12);
-          var p2 = new THREE.Vector3(-40, 0, 0);
-          var a  = p0.clone().lerp(p1, tr);
-          var b  = p1.clone().lerp(p2, tr);
-          rocket.position.copy(a.lerp(b, tr));
-          rocket.rotation.z = -0.7;
-          rocket.rotation.y += 0.02;
-        }
-      }
-
-      renderer.render(scene, camera);
-    }
-
-    animate();
-  </script>
+animate();
+</script>
 </body>
 </html>
