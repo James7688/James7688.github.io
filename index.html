@@ -848,30 +848,48 @@ function showVenusImage(src) {
   venusImg.onload = null;
   venusImg.onerror = null;
 
-  let done = false;
+  let finished = false;
+  let triedProxy = false;
+  let triedFallback = false;
 
-  venusImg.onload = () => {
-    if (done) return;
-    done = true;
+  function markLoaded() {
+    if (finished) return;
+    finished = true;
     venusImg.classList.add("loaded");
-  };
+  }
 
-  venusImg.onerror = () => {
-    if (done) return;
-    done = true;
+  function buildProxyUrl(url) {
+    return "https://images.weserv.nl/?url=" + encodeURIComponent(url.replace(/^https?:\/\//, ""));
+  }
 
+  function load(url) {
     venusImg.onload = () => {
-      venusImg.classList.add("loaded");
+      markLoaded();
     };
 
-    venusImg.src = VENUS_FALLBACK_SRC;
-  };
+    venusImg.onerror = () => {
+      if (!triedProxy) {
+        triedProxy = true;
+        load(buildProxyUrl(src));
+        return;
+      }
 
-  // force reload even when browser caches / previous broken image state sticks
-  venusImg.src = "";
-  requestAnimationFrame(() => {
-    venusImg.src = src;
-  });
+      if (!triedFallback) {
+        triedFallback = true;
+        load(VENUS_FALLBACK_SRC);
+        return;
+      }
+
+      markLoaded();
+    };
+
+    venusImg.src = "";
+    requestAnimationFrame(() => {
+      venusImg.src = url;
+    });
+  }
+
+  load(src);
 }
 
 function goTo(i) {
