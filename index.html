@@ -11,7 +11,7 @@
       height: 100%;
       overflow: hidden;
       background: #000;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
       color: #fff;
     }
     canvas { display: block; }
@@ -727,6 +727,115 @@ const routeLine = new THREE.Line(
 routeLine.visible = false;
 pg.add(routeLine);
 
+function svgToDataUri(svg) {
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
+function createRadarMapImage() {
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+    <defs>
+      <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="5"/>
+        <feColorMatrix type="matrix" values="
+          0.5 0 0 0 0.35
+          0 0.5 0 0 0.35
+          0 0 0.5 0 0.35
+          0 0 0 1 0"/>
+      </filter>
+      <radialGradient id="fade" cx="50%" cy="50%" r="60%">
+        <stop offset="0%" stop-color="#d3c5a2" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#75664a" stop-opacity="0.18"/>
+      </radialGradient>
+    </defs>
+    <rect width="1600" height="900" fill="#5a554d"/>
+    <rect width="1600" height="900" filter="url(#noise)" opacity="0.9"/>
+    <g opacity="0.78">
+      <path d="M230 430 C320 250, 520 170, 780 190 C1020 210, 1240 300, 1340 430 C1260 620, 980 710, 770 700 C480 690, 290 590, 230 430 Z"
+            fill="none" stroke="#d6c39a" stroke-width="28"/>
+      <path d="M360 430 C450 310, 610 250, 790 265 C960 280, 1110 345, 1200 430 C1135 560, 965 620, 790 615 C610 610, 440 555, 360 430 Z"
+            fill="none" stroke="#99886b" stroke-width="8" opacity="0.8"/>
+      <path d="M500 360 L760 305 L910 360 L1180 390" stroke="#c9b58f" stroke-width="10" fill="none" opacity="0.65"/>
+      <path d="M430 520 L650 470 L860 500 L1110 545" stroke="#e2d1a7" stroke-width="12" fill="none" opacity="0.55"/>
+      <path d="M615 220 L700 310 L670 420 L580 520 L460 585" stroke="#8d7b5f" stroke-width="6" fill="none" opacity="0.75"/>
+      <path d="M985 250 L1030 340 L1010 435 L920 560" stroke="#8d7b5f" stroke-width="6" fill="none" opacity="0.75"/>
+      <circle cx="520" cy="470" r="22" fill="none" stroke="#efe2bf" stroke-width="6"/>
+      <circle cx="1040" cy="420" r="18" fill="none" stroke="#efe2bf" stroke-width="5"/>
+      <circle cx="880" cy="560" r="28" fill="none" stroke="#c9b58f" stroke-width="7"/>
+    </g>
+  </svg>`;
+  return svgToDataUri(svg);
+}
+
+function createVolcanoImage() {
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+    <defs>
+      <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#7b532d"/>
+        <stop offset="50%" stop-color="#a86f38"/>
+        <stop offset="100%" stop-color="#d18b47"/>
+      </linearGradient>
+      <linearGradient id="ground" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#8c5a2d"/>
+        <stop offset="100%" stop-color="#583116"/>
+      </linearGradient>
+      <radialGradient id="glow" cx="50%" cy="30%" r="60%">
+        <stop offset="0%" stop-color="#ffcc7d" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#ffcc7d" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#sky)"/>
+    <rect width="1600" height="900" fill="url(#glow)"/>
+    <path d="M0 590 C170 540, 290 565, 430 610 C560 650, 720 650, 860 615 C1040 570, 1190 555, 1600 615 L1600 900 L0 900 Z"
+          fill="url(#ground)"/>
+    <path d="M470 620 L700 390 L865 620 Z" fill="#6e3c1a"/>
+    <path d="M630 620 L770 470 L885 620 Z" fill="#7f461e"/>
+    <path d="M705 430 C720 410, 770 410, 790 430 C775 455, 720 455, 705 430 Z" fill="#3a2417"/>
+    <path d="M765 428 C792 380, 825 355, 848 315" stroke="#ffae4d" stroke-width="8" fill="none" opacity="0.8"/>
+    <path d="M835 325 C860 315, 880 330, 875 350 C860 362, 842 355, 835 325 Z" fill="#e88937"/>
+    <path d="M250 700 C350 650, 460 650, 570 705" stroke="#a46736" stroke-width="28" fill="none" opacity="0.7"/>
+    <path d="M920 710 C1030 655, 1170 660, 1320 730" stroke="#9e6333" stroke-width="24" fill="none" opacity="0.7"/>
+    <path d="M1100 555 C1180 520, 1270 520, 1370 565" stroke="#c68042" stroke-width="12" fill="none" opacity="0.55"/>
+  </svg>`;
+  return svgToDataUri(svg);
+}
+
+function createVeneraImage() {
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+    <defs>
+      <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#d58f38"/>
+        <stop offset="100%" stop-color="#a85c1a"/>
+      </linearGradient>
+      <linearGradient id="ground" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#a85c27"/>
+        <stop offset="100%" stop-color="#703a17"/>
+      </linearGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#sky)"/>
+    <rect y="620" width="1600" height="280" fill="url(#ground)"/>
+    <g opacity="0.95">
+      <path d="M1130 290 L1170 290 L1235 890 L1188 890 Z" fill="#d9c4a0"/>
+      <path d="M1200 375 L1295 385 L1278 425 L1212 420 Z" fill="#b7a17f"/>
+      <path d="M1216 486 L1310 500 L1290 540 L1225 530 Z" fill="#b7a17f"/>
+    </g>
+    <g opacity="0.9">
+      <ellipse cx="340" cy="725" rx="150" ry="55" fill="#935126"/>
+      <ellipse cx="565" cy="765" rx="180" ry="65" fill="#84471f"/>
+      <ellipse cx="850" cy="735" rx="190" ry="60" fill="#9b5a2d"/>
+      <ellipse cx="1115" cy="780" rx="210" ry="70" fill="#7d411c"/>
+      <ellipse cx="1400" cy="742" rx="170" ry="55" fill="#99542a"/>
+    </g>
+  </svg>`;
+  return svgToDataUri(svg);
+}
+
+const rocket = makeRocket();
+const orbiter = makeOrbiter();
+const probe = makeProbe();
+
 const VP = venus.position;
 
 const SCENES = [
@@ -763,14 +872,14 @@ const SCENES = [
   },
   {
     type: "venus",
-    imgSrc: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Magellan_-_Full_Resolution_Radar_Mosaic_of_Venus_in_Sinusoidal_Equal-Area_Projection.jpg/1280px-Magellan_-_Full_Resolution_Radar_Mosaic_of_Venus_in_Sinusoidal_Equal-Area_Projection.jpg",
+    imgSrc: createRadarMapImage(),
     fallbackSrc: "https://threejs.org/examples/textures/planets/venus.jpg",
     imgTitle: "Venus Surface — Radar Map by Magellan",
     imgText: "Because Venus is covered by clouds, we use radar to see the surface. NASA's Magellan mission (1990–1994) mapped over 98% of Venus. It revealed thousands of volcanoes, vast lava plains, and mountain ranges.",
   },
   {
     type: "venus",
-    imgSrc: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Maat_Mons_on_Venus.jpg/1280px-Maat_Mons_on_Venus.jpg",
+    imgSrc: createVolcanoImage(),
     fallbackSrc: "https://threejs.org/examples/textures/planets/venus.jpg",
     imgTitle: "Volcanic Landscape of Venus",
     imgText: "Scientists believe Venus may still have active volcanoes today. The surface is covered in lava flows and volcanic craters. High temperatures and pressure make it one of the most hostile surfaces in the Solar System.",
@@ -849,7 +958,7 @@ const SCENES = [
   },
   {
     type: "venus",
-    imgSrc: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Venera_13_leg.jpg/1024px-Venera_13_leg.jpg",
+    imgSrc: createVeneraImage(),
     fallbackSrc: "https://threejs.org/examples/textures/planets/venus.jpg",
     imgTitle: "Venera 13 — First Colour Photos from Venus (1982)",
     imgText: "The Soviet Venera 13 probe took the first colour photos from the Venusian surface in 1982. It survived for 127 minutes. The orange sky is caused by the thick atmosphere filtering sunlight. Rocky slabs cover the ground.",
@@ -908,7 +1017,7 @@ function loadDisplayImage(imgEl, src, fallbackSrc, token) {
   imgEl.classList.remove("loaded");
   imgEl.onload = null;
   imgEl.onerror = null;
-  imgEl.src = "";
+  imgEl.removeAttribute("src");
 
   let usedFallback = false;
 
@@ -947,7 +1056,6 @@ function goTo(i) {
     venusImgText.textContent = s.imgText;
     venusScene.classList.add("active");
     panel.classList.add("hidden");
-
     loadDisplayImage(venusImg, s.imgSrc, s.fallbackSrc, venusToken);
     return;
   }
@@ -957,7 +1065,7 @@ function goTo(i) {
   venusImg.classList.remove("loaded");
   venusImg.onload = null;
   venusImg.onerror = null;
-  venusImg.src = "";
+  venusImg.removeAttribute("src");
 
   camTarget.copy(s.cam);
   lookTarget.copy(s.look);
@@ -1089,3 +1197,5 @@ function animate() {
 
 animate();
 </script>
+</body>
+</html>
