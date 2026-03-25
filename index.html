@@ -30,7 +30,8 @@
     }
     #title { font-size:clamp(22px,3vw,38px); font-weight:800; line-height:1.15; margin-bottom:8px; }
     #subtitle { font-size:clamp(12px,1.3vw,16px); color:#ffd79a; margin-bottom:14px; font-style:italic; }
-    #bodyText { font-size:clamp(12px,1.1vw,15px); line-height:1.7; color:#e8e8e8; white-space:pre-line; }
+    #bodyText { font-size:clamp(12px,1.1vw,15px); line-height:1.7; color:#e8e8e8; }
+    #bodyText strong { color:#ffffff; font-weight:700; }
 
     #sceneCounter {
       position:fixed; top:18px; right:18px;
@@ -60,7 +61,7 @@
     #venusImageScene.active { display:flex; }
     #venusImg {
       width:100%; height:100%; object-fit:cover;
-      opacity:0; transition:opacity 1.2s ease;
+      opacity:0; transition:opacity 0.35s ease;
     }
     #venusImg.loaded { opacity:1; }
     #venusImgError {
@@ -401,7 +402,7 @@ var SCENES = [
   { type:"space", category:"Introduction",
     title:"Exploring Venus",
     subtitle:"A Mission Plan by Quy Anh Nguyen and Huyen Tien",
-    text:"Welcome to our presentation.\nToday, we will take you through our mission plan to explore Venus — one of the most mysterious and extreme planets in our Solar System.",
+    text:"Welcome to our presentation.<br>Today, we will take you through our mission plan to explore Venus — one of the most <strong>mysterious and extreme planets</strong> in our Solar System.",
     cam:new THREE.Vector3(22,8,24), look:new THREE.Vector3(0,0,0),
     enter:function(){ rocket.visible=true; orbiter.visible=false; probe.visible=false; routeLine.visible=false; }
   },
@@ -409,7 +410,7 @@ var SCENES = [
   { type:"space", category:"Background",
     title:"Why Do We Explore Space?",
     subtitle:"Understanding the universe around us",
-    text:"Space exploration helps us understand where we come from and how planets form.\n\nIt drives new technology — satellites, computers, and medical tools have all come from space research.\n\nMost importantly, it answers one of the greatest questions: Are we alone?",
+    text:"Space exploration helps us understand <strong>where we come from</strong> and how planets form.<br><br>It drives new technology — satellites, computers, and medical tools have all come from space research.<br><br>Most importantly, it answers one of the greatest questions: <strong>Are we alone?</strong>",
     cam:new THREE.Vector3(60,35,200), look:new THREE.Vector3(50,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=false; probe.visible=false; routeLine.visible=false; }
   },
@@ -417,7 +418,7 @@ var SCENES = [
   { type:"space", category:"Target Planet",
     title:"Why Venus?",
     subtitle:"Earth's twin — gone terribly wrong",
-    text:"Venus is almost the same size as Earth, but evolved very differently.\n\nVenus has:\n• Surface temperature: 465°C — hot enough to melt lead\n• Atmospheric pressure: 92× Earth's (like 900 m underwater)\n• Clouds of sulfuric acid\n\nUnderstanding Venus tells us how a planet like Earth can become a nightmare.",
+    text:"Venus is almost the same size as Earth, but evolved very differently.<br><br>Venus has:<br>• <strong>Surface temperature: 465°C</strong> — hot enough to melt lead<br>• <strong>Atmospheric pressure: 92× Earth's</strong> (like 900 m underwater)<br>• <strong>Clouds of sulfuric acid</strong><br><br>Understanding Venus tells us how a planet like Earth can become a nightmare.",
     cam:new THREE.Vector3(VP.x+8,VP.y+12,VP.z+38), look:new THREE.Vector3(VP.x,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=false; probe.visible=false; routeLine.visible=false; }
   },
@@ -443,7 +444,7 @@ var SCENES = [
   { type:"space", category:"Science Goals",
     title:"What Can We Discover?",
     subtitle:"Key questions our mission will answer",
-    text:"Our mission focuses on three main scientific goals:\n\n① Is Venus still volcanically active today?\n② Did Venus once have oceans of liquid water?\n③ What caused its runaway greenhouse effect — and could Earth suffer the same fate?\n\nAnswering these questions helps us protect our own planet.",
+    text:"Our mission focuses on three main scientific goals:<br><br>① <strong>Is Venus still volcanically active today?</strong><br>② <strong>Did Venus once have oceans of liquid water?</strong><br>③ <strong>What caused its runaway greenhouse effect</strong> — and could Earth suffer the same fate?<br><br>Answering these questions helps us protect our own planet.",
     cam:new THREE.Vector3(VP.x+5,VP.y+10,VP.z+32), look:new THREE.Vector3(VP.x,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=false; probe.visible=false; routeLine.visible=false; }
   },
@@ -451,7 +452,7 @@ var SCENES = [
   { type:"space", category:"Challenges",
     title:"Risks & Dangers",
     subtitle:"Why Venus is the hardest planet to explore",
-    text:"Venus destroys spacecraft very quickly:\n\n🌡 Extreme heat (465°C) melts most electronics\n⚠ Crushing pressure — 92× Earth's atmosphere\n☁ Sulfuric acid clouds corrode metal and sensors\n💨 Hurricane-force winds at cloud level (360 km/h)\n\nThe Soviet Venera probes lasted only 23–127 minutes on the surface. Our spacecraft must be specially built to survive.",
+    text:"Venus destroys spacecraft very quickly:<br><br>• <strong>Extreme heat (465°C)</strong> melts most electronics<br>• <strong>Crushing pressure</strong> — 92× Earth's atmosphere<br>• <strong>Sulfuric acid clouds</strong> corrode metal and sensors<br>• <strong>Hurricane-force winds</strong> at cloud level (360 km/h)<br><br>The Soviet Venera probes lasted only <strong>23–127 minutes</strong> on the surface. Our spacecraft must be specially built to survive.",
     cam:new THREE.Vector3(VP.x+12,VP.y+6,VP.z+22), look:new THREE.Vector3(VP.x,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=false; probe.visible=false; routeLine.visible=false; }
   },
@@ -459,7 +460,7 @@ var SCENES = [
   { type:"space", category:"Equipment",
     title:"Mission Equipment",
     subtitle:"What we bring and why",
-    text:"Our spacecraft carries three main components:\n\n🚀 Launch Rocket — carries everything into space from Earth\n🛰 Orbiter — stays in orbit around Venus; maps the surface and relays data\n🔬 Atmospheric Probe — descends through the clouds; measures temperature, pressure, and chemistry\n\nAll components use titanium alloys and ceramic heat shields to survive Venus's conditions.",
+    text:"Our spacecraft carries three main components:<br><br>• <strong>Launch Rocket</strong> — carries everything into space from Earth<br>• <strong>Orbiter</strong> — stays in orbit around Venus; maps the surface and relays data<br>• <strong>Atmospheric Probe</strong> — descends through the clouds; measures temperature, pressure, and chemistry<br><br>All components use <strong>titanium alloys and ceramic heat shields</strong> to survive Venus's conditions.",
     cam:new THREE.Vector3(VP.x-5,VP.y+18,VP.z+70), look:new THREE.Vector3(VP.x-10,2,0),
     enter:function(){ rocket.visible=true; orbiter.visible=true; probe.visible=true; routeLine.visible=false; }
   },
@@ -467,7 +468,7 @@ var SCENES = [
   { type:"space", category:"Mission Plan",
     title:"The Journey: Earth to Venus",
     subtitle:"How we get there",
-    text:"The mission follows a Hohmann transfer orbit — a fuel-efficient curved path between Earth and Venus.\n\nTravel time: approximately 3–5 months.\n\nUpon arrival, the spacecraft fires its engine to enter Venus orbit. The probe then separates and begins its descent.",
+    text:"The mission follows a <strong>Hohmann transfer orbit</strong> — a fuel-efficient curved path between Earth and Venus.<br><br><strong>Travel time: approximately 3–5 months.</strong><br><br>Upon arrival, the spacecraft fires its engine to enter Venus orbit. The probe then separates and begins its descent.",
     cam:new THREE.Vector3(-12,28,90), look:new THREE.Vector3(-22,2,0),
     enter:function(){ rocket.visible=true; orbiter.visible=false; probe.visible=false; routeLine.visible=true; }
   },
@@ -475,7 +476,7 @@ var SCENES = [
   { type:"space", category:"Phase 1 — Launch",
     title:"Phase 1: Launch",
     subtitle:"Lifting off from Earth",
-    text:"The rocket launches from Earth carrying the orbiter and probe stacked together.\n\nKey launch facts:\n• Rocket height: ~70 m (like a 20-storey building)\n• Thrust: 7–8 million Newtons at liftoff\n• Time to orbit: ~9 minutes\n\nThe first stage lands back for reuse. The upper stage continues toward Venus.",
+    text:"The rocket launches from Earth carrying the orbiter and probe stacked together.<br><br>Key launch facts:<br>• <strong>Rocket height: ~70 m</strong> (like a 20-storey building)<br>• <strong>Thrust: 7–8 million Newtons</strong> at liftoff<br>• <strong>Time to orbit: ~9 minutes</strong><br><br>The first stage lands back for reuse. The upper stage continues toward Venus.",
     cam:new THREE.Vector3(earth.position.x+8,earth.position.y+12,earth.position.z+24), look:new THREE.Vector3(earth.position.x,0,0),
     enter:function(){ rocket.visible=true; orbiter.visible=false; probe.visible=false; routeLine.visible=false; }
   },
@@ -483,7 +484,7 @@ var SCENES = [
   { type:"space", category:"Phase 2 — Orbiter",
     title:"Phase 2: The Orbiter",
     subtitle:"Mapping Venus from above",
-    text:"The orbiter circles Venus every ~24 hours.\n\nIts instruments include:\n• SAR radar camera — maps the surface through clouds\n• Infrared spectrometer — detects volcanic heat signatures\n• Magnetometer — measures Venus's magnetic field\n• High-gain dish antenna — transmits data back to Earth\n\nIt will operate for at least 3 years in orbit.",
+    text:"The orbiter circles Venus every <strong>~24 hours</strong>.<br><br>Its instruments include:<br>• <strong>SAR radar camera</strong> — maps the surface through clouds<br>• <strong>Infrared spectrometer</strong> — detects volcanic heat signatures<br>• <strong>Magnetometer</strong> — measures Venus's magnetic field<br>• <strong>High-gain dish antenna</strong> — transmits data back to Earth<br><br>It will operate for at least <strong>3 years</strong> in orbit.",
     cam:new THREE.Vector3(VP.x+4,VP.y+12,VP.z+22), look:new THREE.Vector3(VP.x,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=true; probe.visible=false; routeLine.visible=false; }
   },
@@ -491,7 +492,7 @@ var SCENES = [
   { type:"space", category:"Phase 3 — Probe",
     title:"Phase 3: Atmospheric Entry",
     subtitle:"Descending through the clouds of Venus",
-    text:"The probe separates and begins its descent:\n\n① Heat shield protects it during entry at up to 11,000°C\n② Parachute deploys at 70 km altitude in the cloud layer\n③ Parachute released at 40 km — winds reach 360 km/h here\n④ The probe freefalls through the lower atmosphere\n⑤ It reaches the surface after ~60 minutes\n\nThe probe transmits data the entire way down.",
+    text:"The probe separates and begins its descent:<br><br>① <strong>Heat shield</strong> protects it during entry at up to 11,000°C<br>② <strong>Parachute deploys at 70 km altitude</strong> in the cloud layer<br>③ Parachute released at 40 km — <strong>winds reach 360 km/h here</strong><br>④ The probe freefalls through the lower atmosphere<br>⑤ It reaches the surface after <strong>~60 minutes</strong><br><br>The probe transmits data the entire way down.",
     cam:new THREE.Vector3(VP.x+18,VP.y+2,VP.z+14), look:new THREE.Vector3(VP.x,-4,0),
     enter:function(){ rocket.visible=false; orbiter.visible=false; probe.visible=true; routeLine.visible=false; }
   },
@@ -499,7 +500,7 @@ var SCENES = [
   { type:"space", category:"Phase 3 — Probe",
     title:"On the Surface of Venus",
     subtitle:"The probe's final moments",
-    text:"Once on the surface, the probe has only minutes before the extreme heat destroys it.\n\nIn those final minutes it measures:\n• Exact surface temperature and pressure\n• Chemical composition of rocks and soil\n• Wind speed at ground level\n• Seismic vibrations (possible volcanism)\n\nAll data is sent to the orbiter, which relays it to Earth.",
+    text:"Once on the surface, the probe has only <strong>minutes before the extreme heat destroys it</strong>.<br><br>In those final minutes it measures:<br>• <strong>Exact surface temperature and pressure</strong><br>• Chemical composition of rocks and soil<br>• Wind speed at ground level<br>• <strong>Seismic vibrations</strong> (possible volcanism)<br><br>All data is sent to the orbiter, which relays it to Earth.",
     cam:new THREE.Vector3(VP.x+22,VP.y-3,VP.z+10), look:new THREE.Vector3(VP.x,-6,0),
     enter:function(){ rocket.visible=false; orbiter.visible=false; probe.visible=true; routeLine.visible=false; }
   },
@@ -507,7 +508,7 @@ var SCENES = [
   { type:"space", category:"The Team",
     title:"Mission Specialists",
     subtitle:"Who makes this mission possible",
-    text:"A successful Venus mission needs many experts:\n\n🔧 Aerospace Engineers — design spacecraft to survive Venus\n🧪 Planetary Scientists — analyse the data collected\n💻 Flight Controllers — monitor and command the spacecraft daily\n📡 Communications Engineers — maintain the radio link across millions of km\n🧠 Astrobiologists — search for signs of past life\n\nHundreds of people work together for years before launch.",
+    text:"A successful Venus mission needs many experts:<br><br>• <strong>Aerospace Engineers</strong> — design spacecraft to survive Venus<br>• <strong>Planetary Scientists</strong> — analyse the data collected<br>• <strong>Flight Controllers</strong> — monitor and command the spacecraft daily<br>• <strong>Communications Engineers</strong> — maintain the radio link across millions of km<br>• <strong>Astrobiologists</strong> — search for signs of past life<br><br>Hundreds of people work together for years before launch.",
     cam:new THREE.Vector3(30,20,130), look:new THREE.Vector3(10,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=true; probe.visible=false; routeLine.visible=false; }
   },
@@ -521,7 +522,7 @@ var SCENES = [
   { type:"space", category:"Why It Matters",
     title:"Why This Mission Matters",
     subtitle:"Lessons for Earth",
-    text:"Venus is a warning about climate change.\n\nBillions of years ago, Venus may have been similar to Earth — possibly with oceans and a milder climate. Something triggered a runaway greenhouse effect.\n\nBy studying what happened to Venus, we can:\n• Better predict climate change on Earth\n• Learn how to protect our own atmosphere\n• Understand what makes a planet truly habitable",
+    text:"<strong>Venus is a warning about climate change.</strong><br><br>Billions of years ago, Venus may have been similar to Earth — possibly with oceans and a milder climate. Something triggered a <strong>runaway greenhouse effect</strong>.<br><br>By studying what happened to Venus, we can:<br>• Better predict <strong>climate change on Earth</strong><br>• Learn how to protect our own atmosphere<br>• Understand what makes a planet truly habitable",
     cam:new THREE.Vector3(VP.x+6,VP.y+16,VP.z+55), look:new THREE.Vector3(VP.x-8,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=true; probe.visible=false; routeLine.visible=false; }
   },
@@ -529,7 +530,7 @@ var SCENES = [
   { type:"space", category:"The Future",
     title:"The Future of Venus Exploration",
     subtitle:"What comes next",
-    text:"NASA and ESA have already approved new Venus missions:\n\n🛸 DAVINCI+ (NASA) — probe descending through the atmosphere\n🛸 VERITAS (NASA) — high-resolution radar mapping\n🛸 EnVision (ESA) — studying Venus's geology and climate history\n\nOur mission fits into this exciting new era. Venus is no longer forgotten — it is the next great frontier.",
+    text:"NASA and ESA have already approved new Venus missions:<br><br>• <strong>DAVINCI+</strong> (NASA) — probe descending through the atmosphere<br>• <strong>VERITAS</strong> (NASA) — high-resolution radar mapping<br>• <strong>EnVision</strong> (ESA) — studying Venus's geology and climate history<br><br>Our mission fits into this exciting new era. <strong>Venus is no longer forgotten</strong> — it is the next great frontier.",
     cam:new THREE.Vector3(VP.x+4,VP.y+20,VP.z+80), look:new THREE.Vector3(VP.x,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=true; probe.visible=true; routeLine.visible=false; }
   },
@@ -537,7 +538,7 @@ var SCENES = [
   { type:"space", category:"Conclusion",
     title:"Conclusion",
     subtitle:"Venus is dangerous — but it holds our answers",
-    text:"In conclusion:\n\n✦ Venus is the most extreme planet near Earth\n✦ It can teach us about climate, atmosphere, and planetary evolution\n✦ Our mission sends an orbiter to map it and a probe to measure its atmosphere\n✦ Despite the dangers, the science is worth it\n\nExploring Venus means understanding Earth — and perhaps protecting our future.",
+    text:"In conclusion:<br><br>• <strong>Venus is the most extreme planet near Earth</strong><br>• It can teach us about climate, atmosphere, and planetary evolution<br>• Our mission sends an <strong>orbiter to map it</strong> and a <strong>probe to measure its atmosphere</strong><br>• Despite the dangers, <strong>the science is worth it</strong><br><br>Exploring Venus means understanding Earth — and perhaps protecting our future.",
     cam:new THREE.Vector3(VP.x+12,VP.y+18,VP.z+95), look:new THREE.Vector3(VP.x,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=true; probe.visible=true; routeLine.visible=false; }
   },
@@ -545,7 +546,7 @@ var SCENES = [
   { type:"space", category:"",
     title:"Thank You",
     subtitle:"Quy Anh Nguyen and Huyen Tien",
-    text:"Thank you for listening to our mission plan.\n\nWe hope you now understand why Venus is so important to study, and how our spacecraft will survive one of the most extreme environments in the Solar System.\n\nAny questions?",
+    text:"Thank you for listening to our mission plan.<br><br>We hope you now understand <strong>why Venus is so important to study</strong>, and how our spacecraft will survive one of the most extreme environments in the Solar System.<br><br><strong>Any questions?</strong>",
     cam:new THREE.Vector3(18,12,130), look:new THREE.Vector3(VP.x,0,0),
     enter:function(){ rocket.visible=false; orbiter.visible=false; probe.visible=false; routeLine.visible=false; }
   },
@@ -569,22 +570,40 @@ var cur = 0;
 var camTarget  = SCENES[0].cam.clone();
 var lookTarget = SCENES[0].look.clone();
 
+// ── PRELOAD all venus images immediately so they are cached when needed ──
+(function preloadImages() {
+  var seen = {};
+  for (var i = 0; i < SCENES.length; i++) {
+    var s = SCENES[i];
+    if (s.type === "venus" && s.imgSrc && !seen[s.imgSrc]) {
+      seen[s.imgSrc] = true;
+      var img = new Image();
+      img.src = s.imgSrc;
+    }
+  }
+})();
+
 function goTo(i) {
   cur = Math.max(0, Math.min(i, SCENES.length - 1));
   var s = SCENES[cur];
 
   if (s.type === "venus") {
-    // Show fullscreen image
     venusImg.style.display = "block";
-    venusImg.classList.remove("loaded");
     document.getElementById("venusImgError").style.display = "none";
     venusImgTitle.textContent = s.imgTitle;
     venusImgText.textContent  = s.imgText;
-    venusImg.src = s.imgSrc;
-    venusImg.onload = function() { venusImg.classList.add("loaded"); };
     venusScene.classList.add("active");
     panel.classList.add("hidden");
     counterEl.textContent = "Scene " + (cur + 1) + " / " + SCENES.length;
+
+    // If same src as already loaded, show instantly
+    if (venusImg.src.endsWith(s.imgSrc) && venusImg.complete && venusImg.naturalWidth > 0) {
+      venusImg.classList.add("loaded");
+    } else {
+      venusImg.classList.remove("loaded");
+      venusImg.onload = function() { venusImg.classList.add("loaded"); };
+      venusImg.src = s.imgSrc;
+    }
     return;
   }
 
@@ -599,7 +618,7 @@ function goTo(i) {
     sceneTypeEl.textContent = s.category || "";
     titleEl.textContent     = s.title;
     subtitleEl.textContent  = s.subtitle || "";
-    bodyTextEl.textContent  = s.text || "";
+    bodyTextEl.innerHTML    = s.text || "";
     counterEl.textContent   = "Scene " + (cur + 1) + " / " + SCENES.length;
     panel.classList.remove("hidden");
   }, 220);
