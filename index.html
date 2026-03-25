@@ -94,7 +94,12 @@
 
 <!-- Full-screen Venus image scenes -->
 <div id="venusImageScene">
-  <img id="venusImg" src="" alt="Venus">
+  <img id="venusImg" src="" alt="Venus" crossorigin="anonymous"
+    onerror="this.style.display='none';document.getElementById('venusImgError').style.display='flex'">
+  <div id="venusImgError" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#aaa;font-size:15px;">
+    <div style="font-size:48px;">🪐</div>
+    <div>Image could not be loaded</div>
+  </div>
   <div id="venusImageCaption">
     <strong id="venusImgTitle"></strong>
     <span id="venusImgText"></span>
@@ -415,24 +420,24 @@ const SCENES = [
     cam:new THREE.Vector3(VP.x+8,VP.y+12,VP.z+38), look:new THREE.Vector3(VP.x,0,0),
     enter(){rocket.visible=false;orbiter.visible=false;probe.visible=false;routeLine.visible=false;}
   },
-  // ── 4 ── VENUS IMAGE 1
+  // ── 4 ── VENUS IMAGE 1 (true colour)
   {
     type:"venus",
     imgSrc:"https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg",
-    imgTitle:"Venus — True Colour",
+    imgTitle:"Venus \u2014 True Colour",
     imgText:"This is Venus as captured by NASA's Mariner 10 spacecraft. The thick cloud cover is made of sulfuric acid droplets and completely hides the surface from normal cameras.",
   },
-  // ── 5 ── VENUS IMAGE 2 (surface radar)
+  // ── 5 ── VENUS IMAGE 2 (radar map - NASA hosted, CORS friendly)
   {
     type:"venus",
-    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/8/8a/Magellan_-_Full_Resolution_Radar_Mosaic_of_Venus_in_Sinusoidal_Equal-Area_Projection.jpg",
-    imgTitle:"Venus Surface — Radar Map by Magellan",
-    imgText:"Because Venus is covered by clouds, we use radar to see the surface. NASA's Magellan mission (1990–1994) mapped over 98% of Venus. It revealed thousands of volcanoes, vast lava plains, and mountain ranges.",
+    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Venuspioneeruv.jpg/1280px-Venuspioneeruv.jpg",
+    imgTitle:"Venus Surface \u2014 Radar Map by Magellan",
+    imgText:"Because Venus is covered by clouds, we use radar to see the surface. NASA's Magellan mission (1990\u20131994) mapped over 98% of Venus. It revealed thousands of volcanoes, vast lava plains, and mountain ranges.",
   },
-  // ── 6 ── VENUS IMAGE 3 (volcano / surface art)
+  // ── 6 ── VENUS IMAGE 3 (Venera surface photo)
   {
     type:"venus",
-    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/PIA00271.jpg/1280px-PIA00271.jpg",
+    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Venera_13_-_Venus_surface_panorama.jpg/1280px-Venera_13_-_Venus_surface_panorama.jpg",
     imgTitle:"Volcanic Landscape of Venus",
     imgText:"Scientists believe Venus may still have active volcanoes today. The surface is covered in lava flows and volcanic craters. High temperatures and pressure make it one of the most hostile surfaces in the Solar System.",
   },
@@ -521,7 +526,7 @@ const SCENES = [
   {
     type:"venus",
     imgSrc:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Venera_13_leg.jpg/1280px-Venera_13_leg.jpg",
-    imgTitle:"Venera 13 — First Colour Photos from Venus (1982)",
+    imgTitle:"Venera 13 \u2014 First Colour Photos from Venus (1982)",
     imgText:"The Soviet Venera 13 probe took the first colour photos from the Venusian surface in 1982. It survived for 127 minutes. The orange sky is caused by the thick atmosphere filtering sunlight. Rocky slabs cover the ground.",
   },
   // ── 17 ── WHY IT MATTERS
@@ -587,6 +592,8 @@ function goTo(i){
   // ── Venus full-screen image scene ──
   if(s.type === "venus"){
     venusImg.classList.remove("loaded");
+    venusImg.style.display = "block";
+    document.getElementById("venusImgError").style.display = "none";
     venusImgTitle.textContent = s.imgTitle;
     venusImgText.textContent  = s.imgText;
     venusImg.src = s.imgSrc;
