@@ -94,7 +94,7 @@
 
 <!-- Full-screen Venus image scenes -->
 <div id="venusImageScene">
-  <img id="venusImg" src="" alt="Venus" crossorigin="anonymous"
+  <img id="venusImg" src="" alt="Venus"
     onerror="this.style.display='none';document.getElementById('venusImgError').style.display='flex'">
   <div id="venusImgError" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#aaa;font-size:15px;">
     <div style="font-size:48px;">🪐</div>
@@ -420,26 +420,26 @@ const SCENES = [
     cam:new THREE.Vector3(VP.x+8,VP.y+12,VP.z+38), look:new THREE.Vector3(VP.x,0,0),
     enter(){rocket.visible=false;orbiter.visible=false;probe.visible=false;routeLine.visible=false;}
   },
-  // ── 4 ── VENUS IMAGE 1 (true colour)
+  // ── 4 ── VENUS IMAGE 1 (true colour - NASA photojournal, CORS open)
   {
     type:"venus",
-    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg",
+    imgSrc:"https://photojournal.jpl.nasa.gov/jpeg/PIA00104.jpg",
     imgTitle:"Venus \u2014 True Colour",
-    imgText:"This is Venus as captured by NASA's Mariner 10 spacecraft. The thick cloud cover is made of sulfuric acid droplets and completely hides the surface from normal cameras.",
+    imgText:"Venus photographed in visible light. The entire planet is wrapped in a thick blanket of sulfuric acid clouds, making it impossible to see the surface with a normal camera. The clouds reflect 70% of sunlight, making Venus the brightest object in our sky after the Sun and Moon.",
   },
-  // ── 5 ── VENUS IMAGE 2 (radar map - NASA hosted, CORS friendly)
+  // ── 5 ── VENUS IMAGE 2 (Magellan radar map - NASA photojournal)
   {
     type:"venus",
-    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Venuspioneeruv.jpg/1280px-Venuspioneeruv.jpg",
+    imgSrc:"https://photojournal.jpl.nasa.gov/jpeg/PIA00007.jpg",
     imgTitle:"Venus Surface \u2014 Radar Map by Magellan",
-    imgText:"Because Venus is covered by clouds, we use radar to see the surface. NASA's Magellan mission (1990\u20131994) mapped over 98% of Venus. It revealed thousands of volcanoes, vast lava plains, and mountain ranges.",
+    imgText:"Because Venus is covered by clouds, we use radar to see the surface. NASA's Magellan mission (1990\u20131994) mapped over 98% of Venus. It revealed thousands of volcanoes, vast lava plains, and mountain ranges taller than anything on Earth.",
   },
-  // ── 6 ── VENUS IMAGE 3 (Venera surface photo)
+  // ── 6 ── VENUS IMAGE 3 (Maat Mons volcano - NASA photojournal)
   {
     type:"venus",
-    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Venera_13_-_Venus_surface_panorama.jpg/1280px-Venera_13_-_Venus_surface_panorama.jpg",
-    imgTitle:"Volcanic Landscape of Venus",
-    imgText:"Scientists believe Venus may still have active volcanoes today. The surface is covered in lava flows and volcanic craters. High temperatures and pressure make it one of the most hostile surfaces in the Solar System.",
+    imgSrc:"https://photojournal.jpl.nasa.gov/jpeg/PIA00271.jpg",
+    imgTitle:"Maat Mons \u2014 Volcanic Landscape of Venus",
+    imgText:"This is a 3D reconstruction of Maat Mons, the tallest volcano on Venus at 8 km high. Scientists believe Venus may still have active volcanoes today. The surface temperature of 465\u00b0C and crushing pressure make it one of the most hostile places in the Solar System.",
   },
   // ── 7 ── WHAT CAN WE DISCOVER
   {
@@ -522,12 +522,12 @@ const SCENES = [
     cam:new THREE.Vector3(30,20,130), look:new THREE.Vector3(10,0,0),
     enter(){rocket.visible=false;orbiter.visible=true;probe.visible=false;routeLine.visible=false;}
   },
-  // ── 16 ── VENUS IMAGE 4 (Venera lander)
+  // ── 16 ── VENUS IMAGE 4 (Venera surface - NASA photojournal)
   {
     type:"venus",
-    imgSrc:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Venera_13_leg.jpg/1280px-Venera_13_leg.jpg",
+    imgSrc:"https://photojournal.jpl.nasa.gov/jpeg/PIA00105.jpg",
     imgTitle:"Venera 13 \u2014 First Colour Photos from Venus (1982)",
-    imgText:"The Soviet Venera 13 probe took the first colour photos from the Venusian surface in 1982. It survived for 127 minutes. The orange sky is caused by the thick atmosphere filtering sunlight. Rocky slabs cover the ground.",
+    imgText:"The Soviet Venera 13 probe took the first colour photos from the Venusian surface in 1982. It survived for 127 minutes before being destroyed by the heat. The orange sky is caused by the thick atmosphere filtering sunlight. Rocky slabs cover the ground.",
   },
   // ── 17 ── WHY IT MATTERS
   {
