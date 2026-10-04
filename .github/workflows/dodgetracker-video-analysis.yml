@@ -1,0 +1,55 @@
+name: DodgeTracker video analysis
+
+on:
+  push:
+    branches: [dodgetracker-analysis]
+    paths:
+      - "analysis/input.mp4"
+      - "analysis/analyze_video.py"
+      - ".github/workflows/dodgetracker-video-analysis.yml"
+  workflow_dispatch:
+    inputs:
+      video_path:
+        description: "Repo-relative MP4 path"
+        required: false
+        default: "analysis/input.mp4"
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install video tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade pip
+          pip install numpy opencv-python-headless
+
+      - name: Select input
+        id: input
+        shell: bash
+        run: |
+          VIDEO="${{ github.event.inputs.video_path || 'analysis/input.mp4' }}"
+          echo "video=$VIDEO" >> "$GITHUB_OUTPUT"
+          test -f "$VIDEO" || { echo "::error::Video not found: $VIDEO"; exit 1; }
+          ffprobe -v error -show_format -show_streams -of json "$VIDEO" > ffprobe.json
+
+      - name: Analyze fight
+        run: |
+          python analysis/analyze_video.py "${{ steps.input.outputs.video }}" --out analysis-output
+          cp ffprobe.json analysis-output/ffprobe.json
+
+      - name: Upload analysis artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dodgetracker-video-analysis
+          path: analysis-output/
+          retention-days: 14
